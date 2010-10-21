@@ -39,7 +39,7 @@ class Hash3 {
                 b5 = b5 * inv3.Pow(17) - e * 2053849445;
                 a2 = a2 * (-6).Pow(17) - e * 1811343553 + (b2 + b6) * 270124635;
                 a3 = dn == 1 ? -2000851934 : 2029087778;
-                b2 = b2 * inv3.Pow(17) - 1268346242;
+                b2 = inv3.Pow(17).PowSum(dn) * -1268346242;
                 b6 = b6 * inv3.Pow(17) - inv3.PowSum(17) * e;
             }
             return new HashState(a + a2 + a3, b + b2 + b6 + inv3.Pow(17).PowSum(dn) * 643801250 + b4 + b5);
