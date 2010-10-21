@@ -59,8 +59,8 @@ class Hash3 {
                 b6 = b6 * inv3.Pow(17) - e * inv3.PowSum(17);
                 b9 = b9 * inv3.Pow(17) + a2 * -6 * MainHash.PowRevPowSum(inv3, -6, 17);
                 b10 = dn == 0 ? 0 : 910530428 * inv3.Pow(17).Pow(dn - 1) + -1755474052 * inv3.Pow(17).PowSum(dn - 1);
-                b11 = b11 * inv3.Pow(17) + a4 * -6 * MainHash.PowRevPowSum(inv3, -6, 17);
-                b12 = b12 * inv3.Pow(17) + a5 * -6 * MainHash.PowRevPowSum(inv3, -6, 17);
+                b11 = b11 * inv3.Pow(17) + a4 * -1620747810;
+                b12 = b12 * inv3.Pow(17) + a5 * -1620747810;
 
                 a2 = a2 * (-6).Pow(17) - e * 1814922448;
                 a4 = -1542355254 * MainHash.PowSumRevPowSum((-6).Pow(17), inv3.Pow(17), dn);
