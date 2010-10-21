@@ -16,18 +16,18 @@ class Hash3 {
             Int32 b5 = 0;
             Int32 dn = 0;
             foreach (var e in data) {
-                Int32 pb5 = b5;
                 for (var i = 0; i < 17; i++) {
                     Int32 c = inv3.Pow(17).PowSum(dn) * 643801250 * inv3.Pow(i) 
-                              + 0x74FA * MainHash.PowSumRevPowSum(-6, inv3, i);
+                              + 0x74FA * MainHash.PowSumRevPowSum(-6, inv3, i)
+                              + b5 * inv3.Pow(i)
+                              + -e * MainHash.PowSumRevPowSum(inv3, -6, i);
                     a *= -6;
-                    a += b + c + b4 + b5;
+                    a += b + c + b4;
 
-                    b -= (b + c + b4 + b5 + b2 * inv3.Pow(i) + inv3.PowSum(i) * (0x81BE - e)) % 3;
+                    b -= (b + c + b4 + b2 * inv3.Pow(i) + inv3.PowSum(i) * (0x81BE - e)) % 3;
                     b *= inv3;
                     b4 *= inv3;
                     b4 += 0x81BE * MainHash.PowSumRevPowSum(inv3, -6, i);
-                    b5 = pb5 * inv3.Pow(i + 1) + -e * MainHash.PowSumRevPowSum(inv3, -6, i + 1);
                     b += a
                          + b2 * MainHash.PowRevPowSum(inv3, -6, i + 1) 
                          + a2 * (-6).Pow(i + 1) 
@@ -35,6 +35,7 @@ class Hash3 {
                          - e * MainHash.PowSumRevPowSum(inv3, -6, i);
                 }
                 dn += 1;
+                b5 = b5 * inv3.Pow(17) + -e * MainHash.PowSumRevPowSum(inv3, -6, 17);
                 a2 = a2 * (-6).Pow(17) - e * 1811343553 + b2 * 270124635;
                 a3 = dn == 1 ? -2000851934 : 2029087778;
                 b2 = b2 * (inv3).Pow(17) + (inv3).PowSum(17) * (0x81BE - e);
