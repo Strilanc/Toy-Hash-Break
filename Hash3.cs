@@ -61,7 +61,7 @@ class Hash3 {
                 b12 = b12 * inv3.Pow(17) + a5 * -1620747810;
 
                 a2 = a2 * (-6).Pow(17) - e * 1814922448;
-                a5 = a5 * (-6).Pow(17) + ee.AsEnumerable().Reverse().Zip(inv3.Pow(17).Powers().Take(dn + 1), (x1, x2) => x1 * x2).SumWrap() * -inv3.PowSum(17) * 267738705;
+                a5 = ee.Select((ei, i) => ei * MainHash.PowRevPowSum((-6).Pow(17), inv3.Pow(17), dn + 1 - i)).SumWrap() * 267738705 * -inv3.PowSum(17);
 
                 dn += 1;
             }
