@@ -20,10 +20,17 @@ class Hash3 {
 
                     b -= (b + b2 * (inv3).Pow(i) + (inv3).PowSum(i) * (0x81BE - e)) % 3;
                     b *= inv3;
-                    b += a + (0x81BE - e) * MainHash.PowSumRevPowSum(inv3, -6, i) + b2 * MainHash.PowRevPowSum(inv3, -6, i + 1) + (a2+a3) * (-6).Pow(i + 1) + (-6).PowSum(i + 1) * (0x74FA - e);
+                    b += a
+                         + 0x74FA * (-6).PowSum(i + 1)
+                         + 0x81BE * MainHash.PowSumRevPowSum(inv3, -6, i) 
+                         + b2 * MainHash.PowRevPowSum(inv3, -6, i + 1) 
+                         + a2 * (-6).Pow(i + 1) 
+                         + a3 * (-6).Pow(i + 1) 
+                         - e * MainHash.PowSumRevPowSum(inv3, -6, i)
+                         - e * (-6).PowSum(i + 1);
                 }
                 dn += 1;
-                a2 = a2 * (-6).Pow(17) + (-6).PowSum(17) * -e + -e * 1783724810 + b2 * 270124635;
+                a2 = a2 * (-6).Pow(17) - e * 1811343553 + b2 * 270124635;
                 a3 = (-6).Pow(17).PowSum(dn) * -2000851934;
                 b2 = b2 * (inv3).Pow(17) + (inv3).PowSum(17) * (0x81BE - e);
             }
