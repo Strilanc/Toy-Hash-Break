@@ -10,8 +10,14 @@ class Hash3 {
             Int32 b = 0;
             foreach (var e in data) {
                 for (var i = 0; i < 17; i++) {
-                    a = a * -6 + b + 0x74FA - e;
-                    b = b / 3 + a + 0x81BE - e;
+                    a *= -6;
+                    a += b;
+                    a += 0x74FA;
+                    a -= e;
+                    b /= 3;
+                    b += a;
+                    b += 0x81BE;
+                    b -= e;
                 }
             }
             return new HashState(a, b);
