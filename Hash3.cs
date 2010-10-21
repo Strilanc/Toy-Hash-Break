@@ -16,8 +16,7 @@ class Hash3 {
                 Int32 a4 = 0;
                 for (var i = 0; i < 17; i++) {
                     a4 = b2 * MainHash.PowRevPowSum(inv3, -6, i + 1);
-                    a3 *= -6;
-                    a3 += (inv3).PowSum(i) * (0x81BE - e);
+                    a3 = (0x81BE - e) * MainHash.PowSumRevPowSum(inv3, -6, i);
 
                     a *= -6;
                     a += b;
