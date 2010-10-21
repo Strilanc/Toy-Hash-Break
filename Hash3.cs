@@ -14,14 +14,17 @@ class Hash3 {
             foreach (var e in data) {
                 for (var i = 0; i < 17; i++) {
                     a1 *= -6;
-                    a2 *= -6;
                     a1 += b1 + b2;
+
+                    a2 *= -6;
                     a2 += 0x74FA;
                     a2 -= e;
+
                     b1 -= (b1 + b2) % 3;
                     b1 *= inv3;
-                    b2 *= inv3;
                     b1 += a1 + a2;
+
+                    b2 *= inv3;
                     b2 += 0x81BE;
                     b2 -= e;
                 }
