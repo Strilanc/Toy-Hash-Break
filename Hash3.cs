@@ -22,6 +22,7 @@ class Hash3 {
             Int32 b12 = 0;
             Int32 b13 = 0;
             Int32 dn = 0;
+            var ee = new List<Int32>();
             foreach (var e in data) {
                 for (var i = 0; i < 17; i++) {
                     Int32 c = 643801250 * inv3.Pow(17).PowSum(dn) * inv3.Pow(i) 
@@ -54,7 +55,9 @@ class Hash3 {
                     b13 += -e * MainHash.PowSumRevPowSum(inv3, -6, i);
                 }
 
-                b5 = b5 * inv3.Pow(17) - e * 2053849445;
+                ee.Add(e);
+
+                b5 = ee.AsEnumerable().Reverse().Zip(inv3.Pow(17).Powers().Take(dn + 1), (x1, x2) => x1 * x2).SumWrap() * -2053849445;
                 b6 = b6 * inv3.Pow(17) - e * inv3.PowSum(17);
                 b9 = b9 * inv3.Pow(17) + a2 * -6 * MainHash.PowRevPowSum(inv3, -6, 17);
                 b10 = dn == 0 ? 0 : 910530428 * inv3.Pow(17).Pow(dn - 1) + -1755474052 * inv3.Pow(17).PowSum(dn - 1);

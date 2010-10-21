@@ -125,6 +125,19 @@ public static class MathEx {
         }
     }
 
+    public static Int32 SumWrap(this IEnumerable<Int32> values) {
+        Int32 total = 0;
+        foreach (var value in values)
+            total += value;
+        return total;
+    }
+    public static IEnumerable<Int32> Powers(this Int32 b) {
+        int t = 1;
+        while (true) {
+            yield return t;
+            t *= b;
+        }
+    }
     public static bool DoesAdditionOverflowS32(Int32 v1, Int32 v2) {
         return v1 + v2 == (Int64)v1 + (Int64)v2;
     }
