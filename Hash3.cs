@@ -9,7 +9,6 @@ class Hash3 {
         unchecked {
             Int32 a = 0;
             Int32 a2 = 0;
-            Int32 a5 = 0;
             Int32 b = 0;
             Int32 b4 = 0;
             Int32 b7 = 0;
@@ -30,7 +29,7 @@ class Hash3 {
                               + b9 * inv3.Pow(i) + a2 * -6 * MainHash.PowRevPowSum(inv3, -6, i)
                               + b10 * inv3.Pow(i) + (dn == 0 ? 0 : dn == 1 ? -879790284 : 710375220) * MainHash.PowRevPowSum(inv3, -6, i)
                               + b11 * inv3.Pow(i) + (-1542355254 * MainHash.PowSumRevPowSum((-6).Pow(17), inv3.Pow(17), dn - 1)) * -6 * MainHash.PowRevPowSum(inv3, -6, i)
-                              + b12 * inv3.Pow(i) + a5 * -6 * MainHash.PowRevPowSum(inv3, -6, i);
+                              + b12 * inv3.Pow(i) + ee.Select((ei, j) => ei * MainHash.PowRevPowSum((-6).Pow(17), inv3.Pow(17), dn - j)).SumWrap() * 267738705 * -inv3.PowSum(17) * -6 * MainHash.PowRevPowSum(inv3, -6, i);
                     a *= -6;
                     a += b + b7 + b8 + b13 + c + b4;
 
@@ -53,16 +52,14 @@ class Hash3 {
                     b13 += -e * MainHash.PowSumRevPowSum(inv3, -6, i);
                 }
 
-                ee.Add(e);
-
                 b9 = b9 * inv3.Pow(17) + a2 * -6 * MainHash.PowRevPowSum(inv3, -6, 17);
                 b10 = dn == 0 ? 0 : 910530428 * inv3.Pow(17).Pow(dn - 1) + -1755474052 * inv3.Pow(17).PowSum(dn - 1);
                 b11 = b11 * inv3.Pow(17) + -1542355254 * MainHash.PowSumRevPowSum((-6).Pow(17), inv3.Pow(17), dn - 1) * -1620747810;
-                b12 = b12 * inv3.Pow(17) + a5 * -1620747810;
+                b12 = b12 * inv3.Pow(17) + ee.Select((ei, i) => ei * MainHash.PowRevPowSum((-6).Pow(17), inv3.Pow(17), dn - i)).SumWrap() * 267738705 * -inv3.PowSum(17) * -1620747810;
 
                 a2 = a2 * (-6).Pow(17) - e * 1814922448;
-                a5 = ee.Select((ei, i) => ei * MainHash.PowRevPowSum((-6).Pow(17), inv3.Pow(17), dn + 1 - i)).SumWrap() * 267738705 * -inv3.PowSum(17);
 
+                ee.Add(e);
                 dn += 1;
             }
             return new HashState(
@@ -70,7 +67,7 @@ class Hash3 {
                 + a2
                 + (dn == 0 ? 0 : dn == 1 ? -2000851934 : 2029087778)
                 + -1542355254 * MainHash.PowSumRevPowSum((-6).Pow(17), inv3.Pow(17), dn - 1)
-                + a5, 
+                + ee.Select((ei, i) => ei * MainHash.PowRevPowSum((-6).Pow(17), inv3.Pow(17), dn - i)).SumWrap() * 267738705 * -inv3.PowSum(17), 
                 b 
                 + inv3.Pow(17).PowSum(dn) * -624544992 
                 + b4
