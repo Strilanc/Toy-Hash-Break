@@ -125,6 +125,9 @@ public static class MathEx {
         }
     }
 
+    public static Int32 Dot(this IEnumerable<Int32> values1, IEnumerable<Int32> values2) {
+        return values1.Zip(values2, (v1, v2) => v1 * v2).SumWrap();
+    }
     public static Int32 SumWrap(this IEnumerable<Int32> values) {
         Int32 total = 0;
         foreach (var value in values)
