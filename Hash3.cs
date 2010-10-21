@@ -16,15 +16,15 @@ class Hash3 {
             Int32 b4 = 0;
             Int32 dn = 0;
             foreach (var e in data) {
+                Int32 pb3 = b3;
                 for (var i = 0; i < 17; i++) {
                     a *= -6;
                     a += b + b3 + b4;
 
                     b -= (b + b3 + b4 + b2 * (inv3).Pow(i) + (inv3).PowSum(i) * (0x81BE - e)) % 3;
                     b *= inv3;
-                    b3 *= inv3;
+                    b3 = pb3 * inv3.Pow(i + 1) + 0x74FA * MainHash.PowSumRevPowSum(-6, inv3, i + 1);
                     b4 *= inv3;
-                    b3 += 0x74FA * (-6).PowSum(i + 1);
                     b4 += 0x81BE * MainHash.PowSumRevPowSum(inv3, -6, i);
                     b += a
                          + b2 * MainHash.PowRevPowSum(inv3, -6, i + 1) 
