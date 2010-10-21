@@ -31,7 +31,7 @@ class Hash3 {
                 }
                 dn += 1;
                 a2 = a2 * (-6).Pow(17) - e * 1811343553 + b2 * 270124635;
-                a3 = (-6).Pow(17).PowSum(dn) * -2000851934;
+                a3 = dn == 1 ? -2000851934 : 2029087778;
                 b2 = b2 * (inv3).Pow(17) + (inv3).PowSum(17) * (0x81BE - e);
             }
             return new HashState(a + a2 + a3, b + b2);
