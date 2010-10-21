@@ -30,11 +30,13 @@ class Hash3 {
                               + b5 * inv3.Pow(i)
                               + -e * MainHash.PowSumRevPowSum(inv3, -6, i)
                               + b9 * inv3.Pow(i) + a2 * -6 * MainHash.PowRevPowSum(inv3, -6, i)
-                              + b10 * inv3.Pow(i) + (dn == 0 ? 0 : dn == 1 ? -879790284 : 710375220) * MainHash.PowRevPowSum(inv3, -6, i);
+                              + b10 * inv3.Pow(i) + (dn == 0 ? 0 : dn == 1 ? -879790284 : 710375220) * MainHash.PowRevPowSum(inv3, -6, i)
+                              + b11 * inv3.Pow(i) + a4 * -6 * MainHash.PowRevPowSum(inv3, -6, i)
+                              + b12 * inv3.Pow(i) + a5 * -6 * MainHash.PowRevPowSum(inv3, -6, i);
                     a *= -6;
-                    a += b + b7 + b8 + b11 + b12 + b13 + c + b4;
+                    a += b + b7 + b8 + b13 + c + b4;
 
-                    b -= (b + b7 + b8 + b11 + b12 + b13
+                    b -= (b + b7 + b8 + b13
                           + c 
                           + b4 
                           + inv3.Pow(17).PowSum(dn) * inv3.Pow(i) * -1268346242 
@@ -45,17 +47,15 @@ class Hash3 {
                     b4 *= inv3;
                     b7 *= inv3;
                     b8 *= inv3;
-                    b11 *= inv3;
-                    b12 *= inv3;
                     b13 *= inv3;
                     b4 += 0x81BE * MainHash.PowSumRevPowSum(inv3, -6, i);
                     b += a;
                     b7 += inv3.Pow(17).PowSum(dn) * -1268346242 * MainHash.PowRevPowSum(inv3, -6, i + 1);
                     b8 += b6 * MainHash.PowRevPowSum(inv3, -6, i + 1);
-                    b11 += a4 * (-6).Pow(i + 1);
-                    b12 += a5 * (-6).Pow(i + 1);
                     b13 += -e * MainHash.PowSumRevPowSum(inv3, -6, i);
                 }
+                b11 = b11 * inv3.Pow(17) + a4 * -6 * MainHash.PowRevPowSum(inv3, -6, 17);
+                b12 = b12 * inv3.Pow(17) + a5 * -6 * MainHash.PowRevPowSum(inv3, -6, 17);
                 if (dn > 0) b10 = 910530428 * inv3.Pow(17).Pow(dn - 1) + -1755474052 * inv3.Pow(17).PowSum(dn - 1);
                 b9 = b9 * inv3.Pow(17) + a2 * -6 * MainHash.PowRevPowSum(inv3, -6, 17);
                 a2 = a2 * (-6).Pow(17) - e * 1811343553;
