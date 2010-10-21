@@ -5,6 +5,7 @@ using System.Text;
 
 class Hash3 {
     public static HashState Hash(IEnumerable<Int32> data) {
+        int inv3 = MathEx.MultiplicativeInverseS32(3).Value;
         unchecked {
             Int32 a = 0;
             Int32 b = 0;
@@ -14,7 +15,8 @@ class Hash3 {
                     a += b;
                     a += 0x74FA;
                     a -= e;
-                    b /= 3;
+                    b -= b % 3;
+                    b *= inv3;
                     b += a;
                     b += 0x81BE;
                     b -= e;
