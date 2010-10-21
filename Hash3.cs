@@ -9,7 +9,6 @@ class Hash3 {
         unchecked {
             Int32 a = 0;
             Int32 a2 = 0;
-            Int32 a3 = 0;
             Int32 a4 = 0;
             Int32 a5 = 0;
             Int32 b = 0;
@@ -19,7 +18,7 @@ class Hash3 {
             Int32 dn = 0;
             foreach (var e in data) {
                 for (var i = 0; i < 17; i++) {
-                    Int32 c = inv3.Pow(17).PowSum(dn) * 643801250 * inv3.Pow(i) 
+                    Int32 c = 643801250 * inv3.Pow(17).PowSum(dn) * inv3.Pow(i) 
                               + 0x74FA * MainHash.PowSumRevPowSum(-6, inv3, i)
                               + b5 * inv3.Pow(i)
                               + -e * MainHash.PowSumRevPowSum(inv3, -6, i);
@@ -40,7 +39,7 @@ class Hash3 {
                          + inv3.Pow(17).PowSum(dn) * -1268346242 * MainHash.PowRevPowSum(inv3, -6, i + 1) 
                          + b6 * MainHash.PowRevPowSum(inv3, -6, i + 1)
                          + a2 * (-6).Pow(i + 1)
-                         + a3 * (-6).Pow(i + 1)
+                         + (dn == 0 ? 0 : dn == 1 ? -2000851934 : 2029087778) * (-6).Pow(i + 1)
                          + a4 * (-6).Pow(i + 1)
                          + a5 * (-6).Pow(i + 1)
                          - e * MainHash.PowSumRevPowSum(inv3, -6, i);
@@ -49,11 +48,17 @@ class Hash3 {
                 a4 = a4 * (-6).Pow(17) + inv3.Pow(17).PowSum(dn) * -1542355254;
                 a5 = a5 * (-6).Pow(17) + b6 * 270124635;
                 dn += 1;
-                a3 = dn == 1 ? -2000851934 : 2029087778;
                 b5 = b5 * inv3.Pow(17) - e * 2053849445;
                 b6 = b6 * inv3.Pow(17) - e * inv3.PowSum(17);
             }
-            return new HashState(a + a2 + a3 + a4 + a5, b + inv3.Pow(17).PowSum(dn) * -624544992 + b4 + b5 + b6);
+            return new HashState(
+                a 
+                + a2
+                + (dn == 0 ? 0 : dn == 1 ? -2000851934 : 2029087778)
+                + a4 + a5, 
+                b 
+                + inv3.Pow(17).PowSum(dn) * -624544992 
+                + b4 + b5 + b6);
         }
     }
 }
