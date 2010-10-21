@@ -10,6 +10,8 @@ class Hash3 {
             Int32 a = 0;
             Int32 a2 = 0;
             Int32 a3 = 0;
+            Int32 a4 = 0;
+            Int32 a5 = 0;
             Int32 b = 0;
             Int32 b4 = 0;
             Int32 b5 = 0;
@@ -37,17 +39,21 @@ class Hash3 {
                     b += a
                          + inv3.Pow(17).PowSum(dn) * -1268346242 * MainHash.PowRevPowSum(inv3, -6, i + 1) 
                          + b6 * MainHash.PowRevPowSum(inv3, -6, i + 1)
-                         + a2 * (-6).Pow(i + 1) 
-                         + a3 * (-6).Pow(i + 1) 
+                         + a2 * (-6).Pow(i + 1)
+                         + a3 * (-6).Pow(i + 1)
+                         + a4 * (-6).Pow(i + 1)
+                         + a5 * (-6).Pow(i + 1)
                          - e * MainHash.PowSumRevPowSum(inv3, -6, i);
                 }
                 b5 = b5 * inv3.Pow(17) - e * 2053849445;
-                a2 = a2 * (-6).Pow(17) - e * 1811343553 + inv3.Pow(17).PowSum(dn) * -1542355254 + b6 * 270124635;
+                a2 = a2 * (-6).Pow(17) - e * 1811343553;
+                a4 = a4 * (-6).Pow(17) + inv3.Pow(17).PowSum(dn) * -1542355254;
+                a5 = a5 * (-6).Pow(17) + b6 * 270124635;
                 dn += 1;
                 a3 = dn == 1 ? -2000851934 : 2029087778;
                 b6 = b6 * inv3.Pow(17) - inv3.PowSum(17) * e;
             }
-            return new HashState(a + a2 + a3, b + b6 + inv3.Pow(17).PowSum(dn) * -624544992 + b4 + b5);
+            return new HashState(a + a2 + a3 + a4 + a5, b + b6 + inv3.Pow(17).PowSum(dn) * -624544992 + b4 + b5);
         }
     }
 }
