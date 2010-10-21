@@ -78,7 +78,7 @@
     <CodeContractsReferenceAssembly>%28none%29</CodeContractsReferenceAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>Class1</StartupObject>
+    <StartupObject>MainHash</StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -91,7 +91,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Class1.cs" />
+    <Compile Include="Hash3.cs" />
+    <Compile Include="Main.cs" />
     <Compile Include="GCDExResult.cs" />
     <Compile Include="HashState.cs" />
     <Compile Include="MathEx.cs" />

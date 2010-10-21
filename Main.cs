@@ -5,7 +5,7 @@ using System.Text;
 using System.Numerics;
 using System.Diagnostics.Contracts;
 
-public static class Class1 {
+public static class MainHash {
     const string charSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
     const char charNotInSet = '`';
     static readonly IEnumerable<Int32> DataRange = Encode(charSet + charNotInSet);
@@ -20,7 +20,7 @@ public static class Class1 {
     static Int32 Encode(char c) {
         return charSet.Contains(c) ? charSet.IndexOf(c) : charSet.Length + 1;
     }
-    static IEnumerable<Int32> Encode(string text) {
+    public static IEnumerable<Int32> Encode(string text) {
         return text.Select(Encode);
     }
     static char Decode(Int32 value) {
@@ -39,7 +39,7 @@ public static class Class1 {
             return Tuple.Create(v1, v2);
         }
     }
-    static HashState Hash(IEnumerable<Int32> data) {
+    public static HashState Hash(IEnumerable<Int32> data) {
         unchecked {
             return data.Aggregate(new HashState(), (acc,e) => acc.Advance(e));
         }
