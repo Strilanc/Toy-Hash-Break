@@ -195,13 +195,13 @@ public static class MainHash {
         return new HashState(a - t + 4278, b + inv3.Pow(17).PowSum(dn) * -2106460428);
     }
 
-    static Int32 PowRevPowSum(Int32 v1, Int32 v2, Int32 n) {
+    public static Int32 PowRevPowSum(Int32 v1, Int32 v2, Int32 n) {
         Int32 result = 0;
         for (int i = 0; i < n; i++)
             result += v1.Pow(i) * v2.Pow(n - i - 1);
         return result;
     }
-    static Int32 PowSumRevPowSum(Int32 s1, Int32 v2, Int32 n) {
+    public static Int32 PowSumRevPowSum(Int32 s1, Int32 v2, Int32 n) {
         Int32 result = 0;
         for (int i = 0; i < n; i++)
             result += s1.PowSum(i + 1) * v2.Pow(n - i - 1);
