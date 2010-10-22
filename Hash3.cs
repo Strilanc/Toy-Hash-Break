@@ -21,9 +21,9 @@ class Hash3 {
             var ee = new List<Int32>();
             foreach (var e in data) {
                 for (var i = 0; i < 17; i++) {
-                    Int32 c = 643801250 * i3p17.PowSum(dn) * i3.Pow(i)
+                    Int32 c = 733353434 * i3p17.PowSum(dn) * i3.Pow(i)
                               + 0x74FA * MathEx.TrianglePowSum(-6, i3, i)
-                              + -e * MathEx.TrianglePowSum(i3, -6, i)
+                              + -e * MathEx.TrianglePowSum(-6, i3, i)
                               + b9 * i3.Pow(i) + ee.RevDot(m6p17.Powers()) * -1995367200 * MathEx.DiagonalPowSum(i3, -6, i)
                               + b10 * i3.Pow(i) + (dn == 0 ? 0 : dn == 1 ? -879790284 : 710375220) * MathEx.DiagonalPowSum(i3, -6, i)
                               + b11 * i3.Pow(i) + 664196932 * MathEx.TrianglePowSum(m6p17, i3p17, Math.Max(dn - 1, 0)) * MathEx.DiagonalPowSum(i3, -6, i)
@@ -32,7 +32,7 @@ class Hash3 {
                               + b8
                               + ee.RevDot(i3p17.Powers()) * 454799799 * i3.Pow(i)
                               + -e * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6))
-                              + 89552184 * i3p17.PowSum(dn) * i3.Pow(i) + 0x81BE * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
+                              + 0x81BE * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
                     a *= -6;
                     a += b + c;
 
@@ -67,9 +67,8 @@ class Hash3 {
                 + (dn == 0 ? 0 : dn == 1 ? -2000851934 : 2029087778)
                 + -1542355254 * MathEx.TrianglePowSum(m6p17, i3p17, dn - 1)
                 + ee.RevDot(MathEx.DiagonalPowSums(m6p17, i3p17)) * 267738705 * -i3.PowSum(17), 
-                b 
-                + i3p17.PowSum(dn) * -624544992
-                + 89552184 * i3p17.PowSum(dn)
+                b
+                + -534992808 * i3p17.PowSum(dn)
                 + ee.RevDot(i3p17.Powers()) * 583503382
                 + b7 + b8 + b9 + b10 + b11 + b12);
         }
