@@ -111,6 +111,25 @@ public static class MathEx {
         var r = (BigInteger.ModPow(@base, powerCount, modRange) - 1) / d;
         return (int)(long)r;
     }
+    public static Int32 DiagonalPowSum(Int32 v1, Int32 v2, Int32 n) {
+        BigInteger a = v1;
+        BigInteger b = v2;
+        BigInteger m = (a - b) * (1L << 32);
+        BigInteger numerator = BigInteger.ModPow(a, n, m)
+                             - BigInteger.ModPow(b, n, m);
+        return (Int32)(Int64)((numerator / (a - b)) % (1L << 32));
+    }
+    public static Int32 TrianglePowSum(Int32 v1, Int32 v2, Int32 n) {
+        BigInteger a = v1;
+        BigInteger b = v2;
+        BigInteger ma = (a - 1) * (a - b) * (1L << 32);
+        BigInteger mb = (b - 1) * (a - b) * (1L << 32);
+        BigInteger numerator = BigInteger.ModPow(a, n + 1, ma) * (b - 1)
+                             - BigInteger.ModPow(b, n + 1, mb) * (a - 1)
+                             + a - b;
+        BigInteger denominator = (a - 1) * (b - 1) * (a - b);
+        return (Int32)(Int64)((numerator / denominator) % (1L << 32));
+    }
     public static IEnumerable<Int32> InvPlusThird(Int32 n) {
         Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<Int32>>(), i => i + i / 3 == n));
         unchecked {

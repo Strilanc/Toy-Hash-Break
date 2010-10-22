@@ -177,8 +177,8 @@ public static class MainHash {
             for (int i = 0; i < 17; i++) {
                 var d = 0x9274 * inv3.PowSum(i) //step-dependent
                         + inv3.Pow(17).PowSum(dn) * -2106460428 * inv3.Pow(i) //step and round-count dependent
-                        - e * (PowSumRevPowSum(-6, inv3, i) + inv3.PowSum(i)) //step and char dependent
-                        + f * 6 * s17 * PowRevPowSum(-6, inv3, i); //step and prev 2 chars dependent
+                        - e * (MathEx.TrianglePowSum(-6, inv3, i) + inv3.PowSum(i)) //step and char dependent
+                        + f * 6 * s17 * MathEx.DiagonalPowSum(-6, inv3, i); //step and prev 2 chars dependent
                 a *= -6;
                 a += b + d;
                 b -= (b + d) % 3;
@@ -193,19 +193,6 @@ public static class MainHash {
         Int32 t = (x[1] + x[0] * p17) * s17;
 
         return new HashState(a - t + 4278, b + inv3.Pow(17).PowSum(dn) * -2106460428);
-    }
-
-    public static Int32 PowRevPowSum(Int32 v1, Int32 v2, Int32 n) {
-        Int32 result = 0;
-        for (int i = 0; i < n; i++)
-            result += v1.Pow(i) * v2.Pow(n - i - 1);
-        return result;
-    }
-    public static Int32 PowSumRevPowSum(Int32 s1, Int32 v2, Int32 n) {
-        Int32 result = 0;
-        for (int i = 0; i < n; i++)
-            result += s1.PowSum(i + 1) * v2.Pow(n - i - 1);
-        return result;
     }
 
     static IEnumerable<T[]> Roll<T>(this IEnumerable<T> sequence, int size) {
