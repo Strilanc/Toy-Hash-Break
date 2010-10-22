@@ -22,6 +22,7 @@ class Hash3 {
             Int32 dn = 0;
             var ee = new List<Int32>();
             foreach (var e in data) {
+                Int32 pb13 = b13;
                 for (var i = 0; i < 17; i++) {
                     Int32 c = 643801250 * i3p17.PowSum(dn) * i3.Pow(i)
                               + 0x74FA * MathEx.TrianglePowSum(-6, i3, i)
@@ -54,8 +55,7 @@ class Hash3 {
                     b8 *= i3;
                     b8 += ee.RevDot(i3p17.Powers()) * -i3.PowSum(17) * MathEx.DiagonalPowSum(i3, -6, i + 1);
                     
-                    b13 *= i3;
-                    b13 += -e * MathEx.TrianglePowSum(i3, -6, i);
+                    b13 = pb13 * i3.Pow(i + 1) + -e * i3.Powers().Take(i).RevDot(MathEx.TrianglePowSums(i3, -6));
 
                     b *= i3;
                     b += a;
