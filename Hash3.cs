@@ -18,14 +18,12 @@ class Hash3 {
             Int32 b10 = 0;
             Int32 b11 = 0;
             Int32 b12 = 0;
-            Int32 b13 = 0;
             Int32 dn = 0;
             var ee = new List<Int32>();
             foreach (var e in data) {
                 for (var i = 0; i < 17; i++) {
                     Int32 c = 643801250 * i3p17.PowSum(dn) * i3.Pow(i)
                               + 0x74FA * MathEx.TrianglePowSum(-6, i3, i)
-                              + ee.RevDot(i3p17.Powers()) * -2053849445 * i3.Pow(i)
                               + -e * MathEx.TrianglePowSum(i3, -6, i)
                               + b9 * i3.Pow(i) + ee.RevDot(m6p17.Powers()) * -1995367200 * MathEx.DiagonalPowSum(i3, -6, i)
                               + b10 * i3.Pow(i) + (dn == 0 ? 0 : dn == 1 ? -879790284 : 710375220) * MathEx.DiagonalPowSum(i3, -6, i)
@@ -33,7 +31,8 @@ class Hash3 {
                               + b12 * i3.Pow(i) + ee.RevDot(MathEx.DiagonalPowSums(m6p17, i3p17)) * -21473370 * MathEx.DiagonalPowSum(i3, -6, i)
                               + b7
                               + b8
-                              + ee.RevDot(i3p17.Powers()) * -1786318052 * i3.Pow(i) + -e * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
+                              + ee.RevDot(i3p17.Powers()) * 454799799 * i3.Pow(i)
+                              + -e * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
                     a *= -6;
                     a += b + c + b4;
 
@@ -75,10 +74,8 @@ class Hash3 {
                 b 
                 + i3p17.PowSum(dn) * -624544992 
                 + b4
-                + ee.RevDot(i3p17.Powers()) * -2053849445
-                + ee.RevDot(i3p17.Powers()) * -i3.PowSum(17)
-                + b7 + b8 + b9 + b10 + b11 + b12
-                + ee.RevDot(i3p17.Powers()) * -1786318052);
+                + ee.RevDot(i3p17.Powers()) * 583503382
+                + b7 + b8 + b9 + b10 + b11 + b12);
         }
     }
 }
