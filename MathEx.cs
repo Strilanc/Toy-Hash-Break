@@ -166,6 +166,18 @@ public static class MathEx {
             total += value;
         return total;
     }
+    public static Int32 FactorTrianglePowerSum(IEnumerable<Int32> factors, Int32 v1, Int32 v2) {
+        BigInteger a = v1;
+        BigInteger b = v2;
+        BigInteger t = 0;
+        int i = 0;
+        foreach (var factor in factors.Reverse()) {
+            i += 1;
+            t += factor * (BigInteger.Pow(a, i) - BigInteger.Pow(b, i));
+        }
+        if (t % (a - b) != 0) throw new Exception();
+        return (Int32)(Int64)((t / (a - b)) % (1L << 32));
+    }
     public static IEnumerable<Int32> Powers(this Int32 b) {
         int t = 1;
         while (true) {
