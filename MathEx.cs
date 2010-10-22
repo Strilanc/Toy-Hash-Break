@@ -104,7 +104,7 @@ public static class MathEx {
     }
     public static Int32 PowSum(this Int32 @base, int powerCount) {
         Contract.Requires(@base != 1);
-        Contract.Requires(powerCount > 0);
+        Contract.Requires(powerCount >= 0);
 
         int d = @base - 1;
         long modRange = (1L << 32) * d;
@@ -112,6 +112,7 @@ public static class MathEx {
         return (int)(long)r;
     }
     public static Int32 DiagonalPowSum(Int32 v1, Int32 v2, Int32 n) {
+        Contract.Requires(n >= 0);
         BigInteger a = v1;
         BigInteger b = v2;
         BigInteger m = (a - b) * (1L << 32);
@@ -120,6 +121,7 @@ public static class MathEx {
         return (Int32)(Int64)((numerator / (a - b)) % (1L << 32));
     }
     public static Int32 TrianglePowSum(Int32 v1, Int32 v2, Int32 n) {
+        Contract.Requires(n >= 0);
         BigInteger a = v1;
         BigInteger b = v2;
         BigInteger ma = (a - 1) * (a - b) * (1L << 32);
@@ -129,6 +131,14 @@ public static class MathEx {
                              + a - b;
         BigInteger denominator = (a - 1) * (b - 1) * (a - b);
         return (Int32)(Int64)((numerator / denominator) % (1L << 32));
+    }
+    public static IEnumerable<Int32> DiagonalPowSums(Int32 v1, Int32 v2) {
+        for (int n = 0; true; n++)
+            yield return DiagonalPowSum(v1, v2, n);
+    }
+    public static IEnumerable<Int32> TrianglePowSums(Int32 v1, Int32 v2) {
+        for (int n = 0; true; n++)
+            yield return TrianglePowSum(v1, v2, n);
     }
     public static IEnumerable<Int32> InvPlusThird(Int32 n) {
         Contract.Ensures(Contract.ForAll(Contract.Result<IEnumerable<Int32>>(), i => i + i / 3 == n));

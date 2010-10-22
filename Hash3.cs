@@ -27,7 +27,7 @@ class Hash3 {
                               + -e * MathEx.TrianglePowSum(inv3, -6, i)
                               + b9 * inv3.Pow(i) + ee.RevDot((-6).Pow(17).Powers()) * -1995367200 * MathEx.DiagonalPowSum(inv3, -6, i)
                               + b10 * inv3.Pow(i) + (dn == 0 ? 0 : dn == 1 ? -879790284 : 710375220) * MathEx.DiagonalPowSum(inv3, -6, i)
-                              + b11 * inv3.Pow(i) + 664196932 * MathEx.TrianglePowSum((-6).Pow(17), inv3.Pow(17), dn - 1) * MathEx.DiagonalPowSum(inv3, -6, i)
+                              + b11 * inv3.Pow(i) + 664196932 * MathEx.TrianglePowSum((-6).Pow(17), inv3.Pow(17), Math.Max(dn - 1, 0)) * MathEx.DiagonalPowSum(inv3, -6, i)
                               + b12 * inv3.Pow(i) + ee.Select((ei, j) => ei * MathEx.DiagonalPowSum((-6).Pow(17), inv3.Pow(17), dn - j)).SumWrap() * -21473370 * MathEx.DiagonalPowSum(inv3, -6, i)
                               + b7
                               + b8
@@ -61,7 +61,7 @@ class Hash3 {
 
                 b9 = b9 * inv3.Pow(17) + ee.RevDot((-6).Pow(17).Powers()) * -951417952;
                 b10 = dn == 0 ? 0 : 910530428 * inv3.Pow(17).Pow(dn - 1) + -1755474052 * inv3.Pow(17).PowSum(dn - 1);
-                b11 = b11 * inv3.Pow(17) + MathEx.TrianglePowSum((-6).Pow(17), inv3.Pow(17), dn - 1) * 46210348;
+                b11 = b11 * inv3.Pow(17) + MathEx.TrianglePowSum((-6).Pow(17), inv3.Pow(17), Math.Max(dn - 1, 0)) * 46210348;
                 b12 = b12 * inv3.Pow(17) + ee.Select((ei, i) => ei * MathEx.DiagonalPowSum((-6).Pow(17), inv3.Pow(17), dn - i)).SumWrap() * 243764226;
 
                 ee.Add(e);
