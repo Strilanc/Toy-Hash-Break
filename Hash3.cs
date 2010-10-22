@@ -11,7 +11,6 @@ class Hash3 {
         unchecked {
             Int32 a = 0;
             Int32 b = 0;
-            Int32 b4 = 0;
             Int32 b7 = 0;
             Int32 b8 = 0;
             Int32 b9 = 0;
@@ -33,7 +32,7 @@ class Hash3 {
                               + b8
                               + ee.RevDot(i3p17.Powers()) * 454799799 * i3.Pow(i)
                               + -e * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6))
-                              + b4 * i3.Pow(i) + 0x81BE * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
+                              + 89552184 * i3p17.PowSum(dn) * i3.Pow(i) + 0x81BE * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
                     a *= -6;
                     a += b + c;
 
@@ -54,7 +53,6 @@ class Hash3 {
                     b += a;
                 }
 
-                b4 = b4 * i3.Pow(17) + 0x81BE * i3.Powers().Take(16).RevDot(MathEx.TrianglePowSums(i3, -6));
                 b9 = b9 * i3p17 + ee.RevDot(m6p17.Powers()) * -951417952;
                 b10 = dn == 0 ? 0 : 910530428 * i3p17.Pow(dn - 1) + -1755474052 * i3p17.PowSum(dn - 1);
                 b11 = b11 * i3p17 + MathEx.TrianglePowSum(m6p17, i3p17, Math.Max(dn - 1, 0)) * 46210348;
@@ -70,8 +68,8 @@ class Hash3 {
                 + -1542355254 * MathEx.TrianglePowSum(m6p17, i3p17, dn - 1)
                 + ee.RevDot(MathEx.DiagonalPowSums(m6p17, i3p17)) * 267738705 * -i3.PowSum(17), 
                 b 
-                + i3p17.PowSum(dn) * -624544992 
-                + b4
+                + i3p17.PowSum(dn) * -624544992
+                + 89552184 * i3p17.PowSum(dn)
                 + ee.RevDot(i3p17.Powers()) * 583503382
                 + b7 + b8 + b9 + b10 + b11 + b12);
         }
