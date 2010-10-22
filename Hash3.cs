@@ -62,7 +62,7 @@ class Hash3 {
                 b10 = dn == 0 ? 0 : 910530428 * i3p17.Pow(dn - 1) + -1755474052 * i3p17.PowSum(dn - 1);
                 b11 = b11 * i3p17 + MathEx.TrianglePowSum(m6p17, i3p17, Math.Max(dn - 1, 0)) * 46210348;
                 b12 = b12 * i3p17 + ee.RevDot(MathEx.DiagonalPowSums(m6p17, i3p17)) * 243764226;
-                b13 = b13 * i3p17 + -e * i3.Powers().Take(16).RevDot(MathEx.TrianglePowSums(i3, -6));
+                b13 = b13 * i3p17 + e * -1786318052;
 
                 ee.Add(e);
                 dn += 1;
