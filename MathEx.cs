@@ -133,11 +133,11 @@ public static class MathEx {
         return (Int32)(Int64)((numerator / denominator) % (1L << 32));
     }
     public static IEnumerable<Int32> DiagonalPowSums(Int32 v1, Int32 v2) {
-        for (int n = 0; true; n++)
+        for (int n = 1; true; n++)
             yield return DiagonalPowSum(v1, v2, n);
     }
     public static IEnumerable<Int32> TrianglePowSums(Int32 v1, Int32 v2) {
-        for (int n = 0; true; n++)
+        for (int n = 1; true; n++)
             yield return TrianglePowSum(v1, v2, n);
     }
     public static IEnumerable<Int32> InvPlusThird(Int32 n) {
