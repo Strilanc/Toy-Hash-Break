@@ -17,7 +17,6 @@ class Hash3 {
             Int32 dn = 0;
             var ee = new List<Int32>();
             foreach (var e in data) {
-                Int32 pb8 = b8;
                 for (var i = 0; i < 17; i++) {
                     Int32 c = 733353434 * i3p17.PowSum(dn) * i3.Pow(i)
                               + 0x74FA * MathEx.TrianglePowSum(-6, i3, i)
@@ -33,7 +32,8 @@ class Hash3 {
                               + ee.RevDot(MathEx.DiagonalPowSums(m6p17, i3p17)) * -21473370 * MathEx.DiagonalPowSum(i3, -6, i)
                               + i3.Pow(i) * -1859854618 * i3p17.Powers().Dot(Enumerable.Range(1, Math.Max(dn - 1, 0)))
                               + i3p17.PowSum(dn) * -1268346242 * i3.Powers().Take(i).RevDot(MathEx.DiagonalPowSums(i3, -6))
-                              + b8
+                              + b8 * i3.Pow(i)
+                              + ee.RevDot(i3p17.Powers()) * -i3.PowSum(17) * Enumerable.Range(1, i).Select(j => MathEx.DiagonalPowSum(i3, -6, j)).RevDot(i3.Powers())
                               + ee.RevDot(i3p17.Powers()) * 454799799 * i3.Pow(i)
                               + 0x81BE * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
                     a *= -6;
@@ -46,12 +46,11 @@ class Hash3 {
                           + i3.PowSum(i) * 0x81BE 
                           - i3.PowSum(i) * e) % 3;
                     
-                    b8 = pb8 * i3.Pow(i + 1) + ee.RevDot(i3p17.Powers()) * -i3.PowSum(17) * Enumerable.Range(0, i + 1).Select(j => MathEx.DiagonalPowSum(i3, -6, j + 1)).RevDot(i3.Powers());
-                    
                     b *= i3;
                     b += a;
                 }
 
+                b8 = b8 * i3.Pow(17) + ee.RevDot(i3p17.Powers()) * -i3.PowSum(17) * Enumerable.Range(1, 17).Select(j => MathEx.DiagonalPowSum(i3, -6, j)).RevDot(i3.Powers());
                 b11 = b11 * i3p17 + MathEx.TrianglePowSum(m6p17, i3p17, Math.Max(dn - 1, 0));
                 b12 = b12 * i3p17 + ee.RevDot(MathEx.DiagonalPowSums(m6p17, i3p17));
 
