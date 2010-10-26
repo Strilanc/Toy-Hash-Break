@@ -51,7 +51,7 @@ class Hash3 {
                 }
 
                 b8 = b8 * i3.Pow(17) + ee.RevDot(i3p17.Powers()) * -i3.PowSum(17) * Enumerable.Range(1, 17).Select(j => MathEx.DiagonalPowSum(i3, -6, j)).RevDot(i3.Powers());
-                b11 = b11 * i3p17 + MathEx.TrianglePowSum(m6p17, i3p17, Math.Max(dn - 1, 0));
+                b11 = Enumerable.Range(0, dn + 1).Select(i => MathEx.TrianglePowSum(m6p17, i3p17, Math.Max(i - 1, 0))).RevDot(i3p17.Powers());
                 b12 = b12 * i3p17 + ee.RevDot(MathEx.DiagonalPowSums(m6p17, i3p17));
 
                 ee.Add(e);
