@@ -106,15 +106,15 @@ class Hash3 {
                 a
                 + -1814922448 * ee.RevDot(m6p17.Powers())
                 + (dn == 0 ? 0 : dn == 1 ? -2000851934 : 2029087778)
-                + -1542355254 * MathEx.TrianglePowSum(m6p17, i3p17, dn - 1)
+                + -1542355254 * MathEx.TrianglePowSum(m6p17, i3p17, Math.Max(dn - 1, 0))
                 + 3578895 * ee.RevDot(MathEx.DiagonalPowSums(m6p17, i3p17)), 
                 b
                 + -534992808 * i3p17.PowSum(dn)
                 + 583503382 * ee.RevDot(i3p17.Powers())
-                + -1859854618 * i3p17.Powers().Dot(Enumerable.Range(1, dn - 1))
-                + -907067373 * Enumerable.Range(0, dn - 1).Select(j => ee[j] * i3p17.Pow(dn - j - 2) * (dn - 1 - j)).SumWrap()
+                + -1859854618 * i3p17.Powers().Dot(Enumerable.Range(1, Math.Max(dn - 1, 0)))
+                + -907067373 * Enumerable.Range(0, Math.Max(dn - 1, 0)).Select(j => ee[j] * i3p17.Pow(dn - j - 2) * (dn - 1 - j)).SumWrap()
                 + -951417952 * MathEx.FactorTrianglePowerSum(ee.Take(dn - 1), i3p17, m6p17)
-                + (dn <= 1 ? 0 : 910530428 * i3p17.Pow(dn - 2) + -1755474052 * i3p17.PowSum(dn - 2))
+                + (dn <= 1 ? 0 : 910530428 * i3p17.Pow(dn - 2) + -1755474052 * i3p17.PowSum(Math.Max(dn - 2, 0)))
                 + Enumerable.Range(0, dn).Select(i => MathEx.TrianglePowSum(m6p17, i3p17, Math.Max(i - 1, 0))).RevDot(i3p17.Powers()) * 46210348
                 + Enumerable.Range(0, dn).Select(i => ee.Take(i).RevDot(MathEx.DiagonalPowSums(m6p17, i3p17))).RevDot(i3p17.Powers()) * 243764226);
         }
