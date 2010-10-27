@@ -21,12 +21,7 @@ class Hash3 {
                     a *= -6;
                     a += b + c;
 
-                    b -= (b
-                          + c 
-                          + i3p17.PowSum(dn) * i3.Pow(i) * -1268346242
-                          + ee.RevDot(i3p17.Powers()) * -i3.PowSum(17) * i3.Pow(i) 
-                          + i3.PowSum(i) * 0x81BE 
-                          - i3.PowSum(i) * e) % 3;
+                    b -= (b + c + (i3.PowSum(i) - e) * 0x81BE) % 3;
                     
                     b *= i3;
                     b += a;
