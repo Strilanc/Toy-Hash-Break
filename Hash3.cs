@@ -16,10 +16,8 @@ class Hash3 {
 
             foreach (var e in data.Take(1)) {
                 for (var i = 0; i < 17; i++) {
-                    Int32 c = 0x74FA * MathEx.TrianglePowSum(-6, i3, i)
-                              + -e * MathEx.TrianglePowSum(-6, i3, i)
-                              + -e * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6))
-                              + 0x81BE * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
+                    Int32 c = (0x74FA - e) * MathEx.TrianglePowSum(-6, i3, i)
+                            + (0x81BE - e) * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
                     a *= -6;
                     a += b + c;
 
