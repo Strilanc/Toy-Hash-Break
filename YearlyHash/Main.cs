@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 
 public static class MainHash {
-    const string CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
-    const char CharNotInSet = '`';
+    public const string CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
+    public const char CharNotInSet = '`';
     static readonly IEnumerable<Int32> DataRange = Encode(CharSet + CharNotInSet);
 
     public static void Main() {
         unchecked {
+            var x = Hash(Encode("a"));
+            Hash4.Break(x.A, x.B, 1);
             Console.WriteLine(FindIntermediate(Hash(Encode("<+")), new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu)).ToString());
             Console.ReadLine();
         }
