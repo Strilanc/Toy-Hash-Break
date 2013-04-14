@@ -73,7 +73,7 @@ static class Hash4 {
         var iters = 0;
         unchecked {
             foreach (var e in dataLin) {
-                for (var i = 0; i < 17; i++) {
+                for (var i = 0; i < 2; i++) {
                     a *= -6;
                     a += b;
                     a += offsetA;
@@ -98,6 +98,23 @@ static class Hash4 {
         return new HashState(va, vb);
     }
     public static void Break(int resultA, int resultB, int assumedLength) {
+        Hash(new[] {3});
+        var inv3 = MathEx.MultiplicativeInverseS32(3);
+        resultA = 0;
+        resultB = 0;
+        for (var i = 0; i < 2; i++) {
+            resultA *= -6;
+            resultA += resultB;
+            resultA += 0x74FA;
+            resultA -= 3;
+            var xxx = -resultB%3;
+            resultB /= 3;
+            resultB += resultA;
+            resultB += 0x81BE;
+            resultB -= 3;
+        }
+
+        var rxx = Hash(new[] {0});
         var a = new Linear();
         var b = new Linear();
         var offsetA = new Linear("offA", 1);
@@ -121,13 +138,24 @@ static class Hash4 {
                     a -= e;
                     var k = "rem" + ss[iters] + ss[i];
                     b -= new Linear(k, 1);
-                    //u.Add(new UnknownValue(k, -2, -1, 0, +1, +2));
-                    //r.Add(new Equation(b, 3));
-                    vars.Add("F{0}".Inter(k));
+                    
                     vars.Add(k);
-                    eqs.Add("{1} +5 F{0} = 0".Inter(k, b.Values.Select(p => "{0:+#;-#;0} {1}".Inter(p.Value, p.Key)).Join(" ")));
+                    vars.Add("{0}_range".Inter(k));
+                    vars.Add("{0}_sign".Inter(k));
+                    vars.Add("{0}_mul3".Inter(k));
+
+                    eqs.Add("+{0}_sign >= 0".Inter(k));
+                    eqs.Add("+{0}_sign <= 1".Inter(k));
                     eqs.Add("+{0} <= 2".Inter(k));
                     eqs.Add("+{0} >= -2".Inter(k));
+                    eqs.Add("+{0} +2 {0}_sign >= 0".Inter(k));
+                    eqs.Add("+{0} +2 {0}_sign <= 2".Inter(k));
+                    eqs.Add("+{0} +{1} {0}_range >= {2}".Inter(k, 1L << 32, int.MinValue));
+                    eqs.Add("+{0} +{1} {0}_range <= {2}".Inter(k, 1L << 32, int.MaxValue));
+                    eqs.Add("+{0} +{1} {0}_range +{2} {0}_sign >= 0".Inter(k, 1L << 32, 1L << 31));
+                    eqs.Add("+{0} +{1} {0}_range +{2} {0}_sign <= {2}".Inter(k, 1L << 32, 1L << 31));
+
+                    eqs.Add("{1} +{2} {0}_range +3 {0}_mul3 = 0".Inter(k, b.Values.Select(p => "{0:+#;-#;0} {1}".Inter(p.Value, p.Key)).Join(" "), 1L << 32));
 
                     b *= inv3;
                     b += a;
