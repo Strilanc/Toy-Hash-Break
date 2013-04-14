@@ -49,9 +49,8 @@ public static class MainHash {
 
         while (q.Count > 0) {
             var v = q.Dequeue();
-            foreach (int e in DataRange) {
-                foreach (var h in v.InverseAdvance(e)) {
-                    if (!s.Add(h)) continue;
+            foreach (var e in DataRange) {
+                foreach (var h in v.InverseAdvance(e).Where(s.Add)) {
                     q.Enqueue(h);
                     yield return Tuple.Create(h, Decode(e));
                 }
@@ -65,7 +64,7 @@ public static class MainHash {
 
         while (q.Count > 0) {
             var v = q.Dequeue();
-            foreach (int e in DataRange) {
+            foreach (var e in DataRange) {
                 var h = v.Advance(e);
                 if (!s.Add(h)) continue;
                 q.Enqueue(h);

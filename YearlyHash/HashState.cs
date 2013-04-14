@@ -7,7 +7,7 @@ public struct HashState : IEquatable<HashState> {
 
     public HashState(Int32 a, Int32 b) {
         unchecked {
-            _state = ((Int64)a << 32) | ((Int64)b & 0xFFFFFFFFL);
+            _state = ((Int64)a << 32) | (b & 0xFFFFFFFFL);
         }
     }
     public Int32 A { get { return (Int32)((_state >> 32) & 0xFFFFFFFFL); } }
