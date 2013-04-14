@@ -1,22 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-class Hash3 {
+static class Hash3 {
     public static HashState Hash(IEnumerable<Int32> data) {
-        int i3 = MathEx.MultiplicativeInverseS32(3).Value;
-        int i3p17 = i3.Pow(17);
-        int m6p17 = (-6).Pow(17);
+        var i3 = MathEx.MultiplicativeInverseS32(3);
+        var i3p17 = i3.Pow(17);
+        var m6p17 = (-6).Pow(17);
         unchecked {
-            Int32 a = 0;
-            Int32 b = 0;
-            Int32 dn = 0;
+            var a = 0;
+            var b = 0;
+            var dn = 0;
             var ee = new List<Int32>();
 
             foreach (var e in data.Take(1)) {
                 for (var i = 0; i < 17; i++) {
-                    Int32 c = (0x74FA - e) * MathEx.TrianglePowSum(-6, i3, i)
+                    var c = (0x74FA - e) * MathEx.TrianglePowSum(-6, i3, i)
                             + (0x81BE - e) * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6));
                     a *= -6;
                     a += b + c;
@@ -33,7 +32,7 @@ class Hash3 {
 
             foreach (var e in data.Skip(1).Take(1)) {
                 for (var i = 0; i < 17; i++) {
-                    Int32 c = 733353434 * i3.Pow(i)
+                    var c = 733353434 * i3.Pow(i)
                               + 0x74FA * MathEx.TrianglePowSum(-6, i3, i)
                               + -e * MathEx.TrianglePowSum(-6, i3, i)
                               + -e * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6))
@@ -65,12 +64,12 @@ class Hash3 {
 
             foreach (var e in data.Skip(2)) {
                 for (var i = 0; i < 17; i++) {
-                    Int32 c = 733353434 * i3p17.PowSum(dn) * i3.Pow(i)
+                    var c = 733353434 * i3p17.PowSum(dn) * i3.Pow(i)
                               + 0x74FA * MathEx.TrianglePowSum(-6, i3, i)
                               + -e * MathEx.TrianglePowSum(-6, i3, i)
                               + -e * i3.Powers().Take(i - 1).RevDot(MathEx.TrianglePowSums(i3, -6))
                               + MathEx.FactorTrianglePowerSum(ee.Take(dn - 1), i3p17, m6p17) * -951417952 * i3.Pow(i)
-                              + ee.RevDot(m6p17.Powers()) * -1995367200 * MathEx.DiagonalPowSum(i3, -6, i)
+                              + ee.TakeLast(2).RevDot(m6p17.Powers()) * -1995367200 * MathEx.DiagonalPowSum(i3, -6, i)
                               + 910530428 * i3p17.Pow(dn - 2) * i3.Pow(i)
                               + -1755474052 * i3p17.PowSum(dn - 2) * i3.Pow(i)
                               + 710375220 * MathEx.DiagonalPowSum(i3, -6, i)

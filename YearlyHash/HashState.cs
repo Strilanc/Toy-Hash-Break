@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 
 public struct HashState : IEquatable<HashState> {
     private readonly Int64 _state;
@@ -26,8 +25,8 @@ public struct HashState : IEquatable<HashState> {
     
     public HashState Advance(Int32 e) {
         unchecked {
-            Int32 a = this.A;
-            Int32 b = this.B;
+            var a = this.A;
+            var b = this.B;
             for (var i = 0; i < 17; i++) {
                 a = a * -6 + b + 0x74FA - e;
                 b = b / 3 + a + 0x81BE - e;
@@ -38,28 +37,28 @@ public struct HashState : IEquatable<HashState> {
 
     private IEnumerable<HashState> InverseRoundFast(Int32 e) {
         unchecked {
-            Int32 q = this.B - this.A - 0x81BE + e;
+            var q = this.B - this.A - 0x81BE + e;
             const Int32 d = 3;
 
             if (q < Int32.MinValue / d || q > Int32.MaxValue / d)
                 yield break;
 
             Int32[] divs;
-            int n = q * d;
+            var n = q * d;
             if (n == 0)
-                divs = new Int32[] { -2, -1, 0, 1, 2 };
+                divs = new[] { -2, -1, 0, 1, 2 };
             else if (q == Int32.MaxValue / d)
-                divs = new Int32[] { Int32.MaxValue - 1, Int32.MaxValue };
+                divs = new[] { Int32.MaxValue - 1, Int32.MaxValue };
             else if (n > 0)
-                divs = new Int32[] { n, n + 1, n + 2 };
+                divs = new[] { n, n + 1, n + 2 };
             else
-                divs = new Int32[] { n, n - 1, n - 2 };
+                divs = new[] { n, n - 1, n - 2 };
 
             foreach (var nb in divs) {
-                Int32 product = this.A - 0x74FA + e - nb;
+                var product = this.A - 0x74FA + e - nb;
                 if (product % 2 != 0) continue;
 
-                int item = (product / 2) * 1431655765;
+                var item = (product / 2) * 1431655765;
                 yield return new HashState(item & ~(1 << 31), nb);
                 yield return new HashState(item | (1 << 31), nb);
             }
@@ -74,8 +73,8 @@ public struct HashState : IEquatable<HashState> {
     }
 
     public IEnumerable<HashState> InverseAdvance(Int32 e) {
-        IEnumerable<HashState> result = new HashState[] { this };
-        for (int i = 0; i < 17; i++)
+        IEnumerable<HashState> result = new[] { this };
+        for (var i = 0; i < 17; i++)
             result = (from h in result
                       from g in h.InverseRoundFast(e)
                       select g
@@ -83,6 +82,6 @@ public struct HashState : IEquatable<HashState> {
         return result;
     }
     public override string ToString() {
-        return "(A: " + this.A.ToString() + ", B: " + this.B.ToString() + ")";
+        return "(A: " + this.A + ", B: " + this.B + ")";
     }
 }

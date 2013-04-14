@@ -1,41 +1,38 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Numerics;
-using System.Diagnostics.Contracts;
 
 public static class MainHash {
-    const string charSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
-    const char charNotInSet = '`';
-    static readonly IEnumerable<Int32> DataRange = Encode(charSet + charNotInSet);
+    const string CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
+    const char CharNotInSet = '`';
+    static readonly IEnumerable<Int32> DataRange = Encode(CharSet + CharNotInSet);
 
     public static void Main() {
         unchecked {
-            Console.WriteLine(findIntermediate(Hash(Encode("<+")), new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu)).ToString());
+            Console.WriteLine(FindIntermediate(Hash(Encode("<+")), new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu)).ToString());
             Console.ReadLine();
         }
     }
 
     static Int32 Encode(char c) {
-        return charSet.Contains(c) ? charSet.IndexOf(c) : charSet.Length + 1;
+        return CharSet.Contains(c) ? CharSet.IndexOf(c) : CharSet.Length + 1;
     }
     public static IEnumerable<Int32> Encode(string text) {
         return text.Select(Encode);
     }
     static char Decode(Int32 value) {
-        return value == charSet.Length + 1 ? charNotInSet : charSet[value];
+        return value == CharSet.Length + 1 ? CharNotInSet : CharSet[value];
     }
 
     static Int64 PackTuple(Tuple<Int32, Int32> v) {
         unchecked {
-            return (Int64)(((UInt64)(UInt32)v.Item1) << 32 | (UInt64)(UInt32)v.Item2);
+            return (Int64)(((UInt64)(UInt32)v.Item1) << 32 | (UInt32)v.Item2);
         }
     }
     static Tuple<Int32, Int32> UnpackTuple(Int64 v) {
         unchecked {
-            int v1 = (Int32)((v >> 32) & 0xFFFFFFFFL);
-            int v2 = (Int32)(v & 0xFFFFFFFFL);
+            var v1 = (Int32)((v >> 32) & 0xFFFFFFFFL);
+            var v2 = (Int32)(v & 0xFFFFFFFFL);
             return Tuple.Create(v1, v2);
         }
     }
@@ -45,7 +42,7 @@ public static class MainHash {
         }
     }
 
-    static IEnumerable<Tuple<HashState, Char>> findPres(HashState ab, HashSet<HashState> s) {
+    static IEnumerable<Tuple<HashState, Char>> FindPres(HashState ab, HashSet<HashState> s) {
         var q = new Queue<HashState>();
         q.Enqueue(ab);
         s.Add(ab);
@@ -61,7 +58,7 @@ public static class MainHash {
             }
         }
     }
-    static IEnumerable<Tuple<HashState, Char>> findPosts(HashState ab, HashSet<HashState> s) {
+    static IEnumerable<Tuple<HashState, Char>> FindPosts(HashState ab, HashSet<HashState> s) {
         var q = new Queue<HashState>();
         q.Enqueue(ab);
         s.Add(ab);
@@ -76,23 +73,23 @@ public static class MainHash {
             }
         }
     }
-    static Tuple<HashState, Char> findIntermediate(HashState start, HashState end) {
+    static Tuple<HashState, Char> FindIntermediate(HashState start, HashState end) {
         var hs = new HashSet<HashState>();
         var he = new HashSet<HashState>();
-        var i1 = findPosts(start, hs).GetEnumerator();
-        var i2 = findPres(end, he).GetEnumerator();
+        var i1 = FindPosts(start, hs).GetEnumerator();
+        var i2 = FindPres(end, he).GetEnumerator();
 
         const int ForwardSpeed = 10;
         const int BackwardSpeed = 1;
 
         while (true) {
-            for (int i = 0; i < ForwardSpeed; i++) {
+            for (var i = 0; i < ForwardSpeed; i++) {
                 if (!i1.MoveNext()) 
                     return null;
                 if (he.Contains(i1.Current.Item1))
                     return i1.Current;
             }
-            for (int i = 0; i < BackwardSpeed; i++) {
+            for (var i = 0; i < BackwardSpeed; i++) {
                 if (!i2.MoveNext()) 
                     return null;
                 if (hs.Contains(i2.Current.Item1))
@@ -102,8 +99,8 @@ public static class MainHash {
     }
 
     static Int32 TimesPlusRepeat(this Int32 seed, Int32 factor, Int32 offset, int iter) {
-        Int32 result = seed;
-        for (int i = 0; i < iter; i++) {
+        var result = seed;
+        for (var i = 0; i < iter; i++) {
             unchecked {
                 result = offset + factor * result;
             }
@@ -111,11 +108,7 @@ public static class MainHash {
         return result;
     }
     static Int32 PowerSum(this IEnumerable<Int32> ns, int factor) {
-        Int32 result = 0;
-        foreach (var e in ns)
-            result = result * factor + e;
-        return result;
-
+        return ns.Aggregate(0, (current, e) => current*factor + e);
     }
     public static IEnumerable<T> TakeLast<T>(this IEnumerable<T> items, int maxCount) {
         var queue = new Queue<T>(maxCount + 1);
@@ -136,18 +129,18 @@ public static class MainHash {
     static HashState Hash2(IEnumerable<Int32> data) {
         if (data.Count() < 3) return Hash(data);
 
-        int s17 = (-6).PowSum(17);
-        int p17 = (-6).Pow(17);
-        int inv3 = MathEx.MultiplicativeInverseS32(3).Value;
+        var s17 = (-6).PowSum(17);
+        var p17 = (-6).Pow(17);
+        var inv3 = MathEx.MultiplicativeInverseS32(3);
 
-        Int32 a = 0;
-        Int32 b = 0;
+        var a = 0;
+        var b = 0;
 
         //constants don't merge until third character (due to iterative *6 pushing bits away after 32nd round)
         //luckily all the target hashes are known to start with <+
         if (true) {
-            Int32 e1 = data.ElementAt(0);
-            Int32 e2 = data.ElementAt(1);
+            var e1 = data.ElementAt(0);
+            var e2 = data.ElementAt(1);
             for (var i = 1; i <= 17; i++) {
                 a *= -6;
                 a += b;
@@ -167,14 +160,14 @@ public static class MainHash {
             }
         }
 
-        int dn = 0;
+        var dn = 0;
         foreach (var es in data.Roll(3)) {
-            Int32 e = es[2];
-            Int32 p1 = es[1];
-            Int32 p2 = es[0];
-            Int32 f = p1 + p2 * (-6).Pow(17);
+            var e = es[2];
+            var p1 = es[1];
+            var p2 = es[0];
+            var f = p1 + p2 * (-6).Pow(17);
 
-            for (int i = 0; i < 17; i++) {
+            for (var i = 0; i < 17; i++) {
                 var d = 0x9274 * inv3.PowSum(i) //step-dependent
                         + inv3.Pow(17).PowSum(dn) * -2106460428 * inv3.Pow(i) //step and round-count dependent
                         - e * (MathEx.TrianglePowSum(-6, inv3, i) + inv3.PowSum(i)) //step and char dependent
@@ -190,7 +183,7 @@ public static class MainHash {
         }
 
         var x = data.TakeLast(2).ToArray();
-        Int32 t = (x[1] + x[0] * p17) * s17;
+        var t = (x[1] + x[0] * p17) * s17;
 
         return new HashState(a - t + 4278, b + inv3.Pow(17).PowSum(dn) * -2106460428);
     }

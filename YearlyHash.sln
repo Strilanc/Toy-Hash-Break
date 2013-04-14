@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YearlyHash", "YearlyHash\YearlyHash.csproj", "{3156DAE5-1D98-4885-996F-6E83CEFA43DA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "YearlyHashTest", "TestProject1\YearlyHashTest.csproj", "{24B7D330-DFA5-41E4-9245-8B1D8E5801D6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{A220FB35-478D-4C9E-A3F0-97CF59EBF100}"
+	ProjectSection(SolutionItems) = preProject
+		Local.testsettings = Local.testsettings
+		TraceAndTestImpact.testsettings = TraceAndTestImpact.testsettings
+		YearlyHash.vsmdi = YearlyHash.vsmdi
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = YearlyHash.vsmdi
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3156DAE5-1D98-4885-996F-6E83CEFA43DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3156DAE5-1D98-4885-996F-6E83CEFA43DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3156DAE5-1D98-4885-996F-6E83CEFA43DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3156DAE5-1D98-4885-996F-6E83CEFA43DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{24B7D330-DFA5-41E4-9245-8B1D8E5801D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{24B7D330-DFA5-41E4-9245-8B1D8E5801D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{24B7D330-DFA5-41E4-9245-8B1D8E5801D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{24B7D330-DFA5-41E4-9245-8B1D8E5801D6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
