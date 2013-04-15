@@ -64,7 +64,7 @@ public struct HashState : IEquatable<HashState> {
             }
         }
     }
-    private IEnumerable<HashState> InverseRound(Int32 e) {
+    public IEnumerable<HashState> InverseRound(Int32 e) {
         var a = this.A;
         var b = this.B;
         return from nb in MathEx.InvDivS32(b - a - 0x81BE + e, 3)

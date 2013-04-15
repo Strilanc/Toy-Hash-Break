@@ -9,8 +9,20 @@ public static class MainHash {
 
     public static void Main() {
         unchecked {
-            var x = Hash(Encode("a"));
-            Hash4.Break(x.A, x.B, 1);
+            //var yy = new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu);
+            //var zz = (from c in CharSet.Length.Range()
+            //          from p in yy.InverseAdvance(c)
+            //          select p).Distinct().ToArray();
+            //var zz2 = (from c in CharSet.Length.Range()
+            //           from z in zz
+            //           from p in z.InverseAdvance(c)
+            //           select p).Distinct().ToArray();
+            //var zz3 = (from c in CharSet.Length.Range()
+            //           from z in zz2
+            //           from p in z.InverseAdvance(c)
+            //           select p).Distinct().ToArray();
+            var x = Hash(Encode("hjg"));
+            Hash4.Break(x, 2);
             Console.WriteLine(FindIntermediate(Hash(Encode("<+")), new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu)).ToString());
             Console.ReadLine();
         }
