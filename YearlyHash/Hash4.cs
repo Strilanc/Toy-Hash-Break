@@ -4,6 +4,63 @@ using System.Linq;
 using Strilanc.LinqToCollections;
 using System.Collections.Immutable;
 
+class Finear {
+    public readonly int[] Values;
+    public Finear(int[] values) {
+        this.Values = values;
+    }
+    public Finear(int offset, int value) {
+        this.Values = new int[offset + 1];
+        this.Values[offset] = value;
+    }
+    public Finear() {
+        this.Values = new int[0];
+    }
+    public int this[int offset] {
+        get {
+            if (offset >= Values.Length) return 0;
+            return Values[offset];
+        }
+    }
+    public static Finear operator +(Finear v1, Finear v2) {
+        var r = new int[Math.Max(v1.Values.Length, v2.Values.Length)];
+        for (var i = 0; i < v1.Values.Length; i++)
+            r[i] += v1.Values[i];
+        for (var i = 0; i < v2.Values.Length; i++)
+            r[i] += v2.Values[i];
+        return new Finear(r);
+    }
+    public static Finear operator -(Finear v1, Finear v2) {
+        var r = new int[Math.Max(v1.Values.Length, v2.Values.Length)];
+        for (var i = 0; i < v1.Values.Length; i++)
+            r[i] += v1.Values[i];
+        for (var i = 0; i < v2.Values.Length; i++)
+            r[i] -= v2.Values[i];
+        return new Finear(r);
+    }
+    public static Finear operator *(Finear v, int factor) {
+        var r = v.Values.ToArray();
+        for (var i = 0; i < r.Length; i++)
+            r[i] *= factor;
+        return new Finear(r);
+    }
+    public static Finear operator *(int factor, Finear v) {
+        return v * factor;
+    }
+    public int Dot(Finear other) {
+        var r = 0;
+        var n = Math.Min(Values.Length, other.Values.Length);
+        for (var i = 0; i < n; i++)
+            r += Values[i]*other[i];
+        return r;
+    }
+    public static implicit operator Finear(int v) {
+        return new Finear(0, v);
+    }
+    public override string ToString() {
+        return Values.Length.Range().Where(i => Values[i] != 0).Select(e => "[{0}]*{1}".Inter(e, Values[e].Bin())).Join(" + ");
+    }
+}
 class Linear {
     public readonly IReadOnlyDictionary<string, int> Values;
     public readonly int Offset;
@@ -256,25 +313,20 @@ static class Hash4 {
     public static void Break(HashState result, int assumedLength) {
         var inv3 = MathEx.MultiplicativeInverseS32(3);
 
-        var a = new Linear();
-        var b = new Linear();
-        var ss = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-        var dataLin = Enumerable.Range(0, assumedLength).Select((e, i) => new Linear("d" + ss[i], 1)).ToArray();
-        var eqs = new List<Equation>();
-        var vars = new List<UnknownValue>();
+        var a = new Finear();
+        var b = new Finear();
+        var eqs = new List<Fequation>();
         unchecked {
             foreach (var i in assumedLength.Range()) {
-                var e = dataLin[i];
-                vars.Add(new UnknownValue("d" + ss[i], MainHash.CharSet.Length.Range().ToArray()));
+                var e = new Finear(1 + i, 1);
                 foreach (var j in 17.Range()) {
                     a *= -6;
                     a += b;
                     a += 0x74FA;
                     a -= e;
-                    var k = ("r" + i) + j;
-                    vars.Add(new UnknownValue(k, -2, -1, 0, 1, 2));
-                    eqs.Add(new Equation(b, new Linear(k, 1), 3));
-                    b -= new Linear(k, 1);
+                    var k = new Finear(1 + assumedLength + i*17 + j, 1);
+                    eqs.Add(new Fequation(b, k, 3));
+                    b -= k;
 
 
                     b *= inv3;
@@ -285,26 +337,11 @@ static class Hash4 {
             }
         }
 
-        //var nnn = new List<int>();
-        //var aaa = 0;
-        //var bbb = 0;
-        //foreach (var j in 17.Range()) {
-        //    aaa *= -6;
-        //    aaa += bbb;
-        //    aaa += 0x74FA;
-        //    aaa -= 0;
-        //    nnn.Add(bbb % 3);
-        //    bbb -= bbb % 3;
-        //    bbb *= inv3;
-        //    bbb += aaa;
-        //    bbb += 0x81BE;
-        //    bbb -= 0;
-        //}
+        eqs.Add(new Fequation(a, result.A));
+        eqs.Add(new Fequation(b, result.B));
 
-        eqs.Add(new Equation(a, result.A));
-        eqs.Add(new Equation(b, result.B));
-
-        var h = new[] {new {h = result, u = vars.ToImmutableDictionary(e => e.Key, e => e.PossibleValues.ToArray())}}.ToList();
+        var nk = (1 + assumedLength + assumedLength*17);
+        var h = new[] { new { h = result, u = nk.Range().Select(e => (int?)null).ToImmutableList().SetItem(0, 1), eqs = eqs.ToImmutableList() } }.ToList();
         foreach (var i in assumedLength.Range().Reverse()) {
             var hn = h.ToList();
             hn.Clear();
@@ -315,32 +352,29 @@ static class Hash4 {
                     h2.Clear();
                     foreach (var x in h3) {
                         var Bs = MathEx.InvDivS32(x.h.B - x.h.A - 0x81BE + e, 3);
-                        var k = ("r" + i) + j;
+                        var k = 1 + assumedLength + i * 17 + j;
 
                         foreach (var pb in Bs) {
                             var As = MathEx.InvMulS32(x.h.A - 0x74FA + e - pb, -6);
-                            var nu = x.u.SetItem(k, new[] { pb % 3 }).SetItem("d" + ss[i], new[] {e});
+                            var nu = x.u.SetItem(k, pb % 3).SetItem(1 + i, e);
                             foreach (var pa in As) {
                                 var nh = new HashState(pa, pb);
                                 var failed = false;
-                                foreach (var eq in eqs) {
-                                    if (eq.Left.Values.Keys.Concat(eq.Right.Values.Keys).All(kx => nu[kx].Length == 1)) {
-                                        var lin = new Linear(eq.Left.Values.Keys.Concat(eq.Right.Values.Keys).ToDictionary(v => v, v => nu[v].Single()), 1);
-                                        var nn = eq.Left.Dot(lin);
-                                        if (eq.Modulo.HasValue) nn %= eq.Modulo.Value;
-                                        var n22 = eq.Right.Dot(lin);
-                                        if (nn != n22) {
-                                            //var zz = nu["dA"];
-                                            //var zz2 = 17.Range().SelectMany(ee => nu["r0" + ee]);
-                                            //if (zz.SequenceEqual(new[] {0}) && zz2.SequenceEqual(nnn)) {
-                                            //    failed = true;
-                                            //}
-                                            failed = true;
-                                        }
-                                    }
+                                var ne = x.eqs;
+                                foreach (var eq in ne.Where(eq => nk.Range().All(m => (eq.Left[m] == 0 && eq.Right[m] == 0) || nu[m].HasValue))) {
+                                    ne = ne.Remove(eq);
+
+                                    var curAssignedVals = new Finear(nu.Select(v => v ?? 0).ToArray());
+                                    var left = eq.Left.Dot(curAssignedVals);
+                                    if (eq.Modulo.HasValue) left %= eq.Modulo.Value;
+                                    var right = eq.Right.Dot(curAssignedVals);
+                                    if (left == right) continue;
+
+                                    failed = true;
+                                    break;
                                 }
                                 if (!failed) {
-                                    h2.Add(new { h = nh, u = nu });
+                                    h2.Add(new { h = nh, u = nu, eqs = ne });
                                 }
                             }
                         }
@@ -354,7 +388,7 @@ static class Hash4 {
 
         var solution = h.FirstOrDefault(e => Equals(e.h, new HashState(0, 0)));
         if (solution != null) {
-            var solutionR = solution.u.Keys.Where(e => e.StartsWith("d")).OrderBy(e => e).Select(e => solution.u[e].Single()).ToArray();
+            var solutionR = solution.u.Skip(1).Take(assumedLength).Cast<int>().ToArray();
 
             return;
         }
@@ -390,6 +424,19 @@ class Equation {
     public override string ToString() {
         return Left.Values.Where(e => e.Value != 0).Select(e => "{1}*{0}".Inter(e.Key, e.Value.Bin())).Join(" + ") + " + " + Left.Offset.Bin() + (Modulo.HasValue ? " (mod {0})".Inter(Modulo.Value) : " (Int32")
             + " = " + Right.Values.Where(e => e.Value != 0).Select(e => "{1}*{0}".Inter(e.Key, e.Value.Bin())).Join(" + ") + " + " + Right.Offset.Bin();
+    }
+}
+class Fequation {
+    public readonly Finear Left;
+    public readonly Finear Right;
+    public int? Modulo;
+    public Fequation(Finear left, Finear right, int? mod = null) {
+        this.Left = left;
+        this.Right = right;
+        this.Modulo = mod;
+    }
+    public override string ToString() {
+        return Left + (Modulo.HasValue ? " (mod {0})".Inter(Modulo.Value) : " (Int32)") + " = " + Right;
     }
 }
 static class Util {

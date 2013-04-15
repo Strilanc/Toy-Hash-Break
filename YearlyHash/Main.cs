@@ -21,8 +21,9 @@ public static class MainHash {
             //           from z in zz2
             //           from p in z.InverseAdvance(c)
             //           select p).Distinct().ToArray();
-            var x = Hash(Encode("hjg"));
-            Hash4.Break(x, 2);
+            var k = "cde";
+            var x = Hash(Encode(k));
+            Hash4.Break(x, k.Length);
             Console.WriteLine(FindIntermediate(Hash(Encode("<+")), new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu)).ToString());
             Console.ReadLine();
         }
