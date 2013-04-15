@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using Strilanc.LinqToCollections;
 using System.Collections.Immutable;
 
@@ -310,7 +311,7 @@ static class Hash4 {
 
         return minimize + subjectTo + bounds + general + "End";
     }
-    public static void Break(HashState result, int assumedLength, HashState start = default(HashState)) {
+    public static int[] Break(HashState result, int assumedLength, HashState start = default(HashState)) {
         var inv3 = MathEx.MultiplicativeInverseS32(3);
 
         var a = (Finear)start.A;
@@ -357,15 +358,8 @@ static class Hash4 {
             }
         }
 
-        var numExpandOutward = Math.Min(3, assumedLength);
-        var seeds = numExpandOutward
-            .Range()
-            .Aggregate(
-                new[] {new {state = start, data = ImmutableList.Create<int>()}},
-                (cur, _) => (from s in cur
-                             from e in MainHash.CharSet.Length.Range()
-                             select new {state = s.state.Advance(e), data = s.data.Add(e)}).ToArray())
-            .ToDictionary(e => e.state, e => e.data);
+        var numExpandOutward = Math.Max(0, Math.Min(4, assumedLength-1));
+        var filter = HashStateBloomFilter.Gen(start, numExpandOutward, 0.01);
 
         var states = new[] {
             new {
@@ -395,17 +389,16 @@ static class Hash4 {
                     }
                     roundStates = previousRoundStates;
                 }
-                previousDataStates.AddRange(roundStates);
+                previousDataStates.AddRange(dataIndex == numExpandOutward 
+                                          ? roundStates.Where(e => filter.MayContain(e.h)) 
+                                          : roundStates);
             }
             states = previousDataStates;
         }
 
-        var solution = states.FirstOrDefault(e => seeds.ContainsKey(e.h));
-        if (solution != null) {
-            var solutionR = seeds[solution.h].Concat(solution.assignments.Skip(1 + numExpandOutward).Take(assumedLength - numExpandOutward)).ToArray();
-
-            return;
-        }
+        var tails = states.ToDictionary(e => e.h, e => e.assignments);
+        var head = start.ExploreTraceVolatile(numExpandOutward).FirstOrDefault(e => tails.ContainsKey(e.Item1));
+        return head == null ? null : head.Item2.Concat(tails[head.Item1].Skip(1 + numExpandOutward).Take(assumedLength - numExpandOutward)).ToArray();
     }
 }
 class UnknownValue {
@@ -448,6 +441,80 @@ class Fequation {
     }
     public override string ToString() {
         return Left + (Modulo.HasValue ? " (mod {0})".Inter(Modulo.Value) : " (Int32)") + " = " + Right;
+    }
+}
+class HashStateBloomFilter {
+    private readonly Int32[] _bits;
+    private static Tuple<HashState, int, HashStateBloomFilter> _lastGenned;
+    public HashStateBloomFilter(int power, double pFalsePositive) {
+        var n = (long)Math.Pow(MainHash.CharSet.Length, Math.Max(power, 3));
+        var m = -(int)((n*Math.Log(pFalsePositive))/(Math.Log(2)*Math.Log(2)));
+        var k = m * Math.Log(2) / n;
+        m = 1 << (int)Math.Ceiling(Math.Log(m, 2));
+        if (m < 32) m = 32;
+        this._bits = new int[m / 32];
+    }
+    public static HashStateBloomFilter Gen(HashState start, int pow, double pFalsePositive) {
+        if (_lastGenned != null && Equals(_lastGenned.Item1, start) && Equals(_lastGenned.Item2, pow))
+            return _lastGenned.Item3;
+        HashStateBloomFilter x;
+        if (pow == 4) {
+            x = Gen4(start, pFalsePositive);
+        } else {
+            x = new HashStateBloomFilter(4, pFalsePositive);
+            foreach (var e in start.Explore(pow)) {
+                x.Add(e);
+            }
+        }
+        _lastGenned = Tuple.Create(start, pow, x);
+        return x;
+    }
+    public static HashStateBloomFilter Gen4(HashState start, double pFalsePositive) {
+        var x = new HashStateBloomFilter(4, pFalsePositive);
+        var dLen = MainHash.CharSet.Length;
+        for (var d1 = 0; d1 < dLen; d1++) {
+            var start1 = start.Advance(d1);
+            for (var d2 = 0; d2 < dLen; d2++) {
+                var start2 = start1.Advance(d2);
+                for (var d3 = 0; d3 < dLen; d3++) {
+                    var start3 = start2.Advance(d3);
+                    for (var d4 = 0; d4 < dLen; d4++) {
+                        x.Add(start3.Advance(d4));
+                    }
+                }
+            }
+        }
+        return x;
+    }
+    public bool MayContain(HashState h) {
+        var m = (_bits.Length << 5) - 1;
+        var v1 = h.A & m;
+        var v2 = h.B & m;
+        var v3 = (v1 ^ v2) & m;
+        var v4 = (v1 + v2) & m;
+        var v5 = (v1 - v2) & m;
+        var v6 = (h.A ^ (((h.B >> 16) & 0xFFFF) | (h.B << 16))) & m;
+        return ((_bits[v1 >> 5] >> (v1 & 31)) & 1) != 0
+            && ((_bits[v2 >> 5] >> (v2 & 31)) & 1) != 0
+            && ((_bits[v3 >> 5] >> (v3 & 31)) & 1) != 0
+            && ((_bits[v4 >> 5] >> (v4 & 31)) & 1) != 0
+            && ((_bits[v5 >> 5] >> (v5 & 31)) & 1) != 0
+            && ((_bits[v6 >> 5] >> (v6 & 31)) & 1) != 0;
+    }
+    public void Add(HashState h) {
+        var m = (_bits.Length << 5) - 1;
+        var v1 = h.A & m;
+        var v2 = h.B & m;
+        var v3 = (v1 ^ v2) & m;
+        var v4 = (v1 + v2) & m;
+        var v5 = (v1 - v2) & m;
+        var v6 = (h.A ^ (((h.B >> 16) & 0xFFFF) | (h.B << 16))) & m;
+        _bits[v1 >> 5] |= 1 << (v1 & 31);
+        _bits[v2 >> 5] |= 1 << (v2 & 31);
+        _bits[v3 >> 5] |= 1 << (v3 & 31);
+        _bits[v4 >> 5] |= 1 << (v4 & 31);
+        _bits[v5 >> 5] |= 1 << (v5 & 31);
+        _bits[v6 >> 5] |= 1 << (v6 & 31);
     }
 }
 static class Util {

@@ -14,7 +14,10 @@ public struct HashState {
     public override int GetHashCode() {
         return A ^ B;
     }
-    
+
+    public HashState Advance(IEnumerable<Int32> e) {
+        return e.Aggregate(this, (h, x) => h.Advance(x));
+    }
     public HashState Advance(Int32 e) {
         unchecked {
             var a = this.A;
@@ -24,6 +27,34 @@ public struct HashState {
                 b = b / 3 + a + 0x81BE - e;
             }
             return new HashState(a, b);
+        }
+    }
+    private static IEnumerable<int[]> ExploreDataVolatile(int levels, int n) {
+        if (levels <= 0) {
+            yield return new int[n];
+            yield break;
+        }
+        foreach (var e in ExploreDataVolatile(levels - 1, n)) {
+            for (var d = 0; d < MainHash.CharSet.Length; d++) {
+                e[levels - 1] = d;
+                yield return e;
+            }
+        }
+    }
+    public IEnumerable<HashState> Explore(int levels) {
+        if (levels <= 0) {
+            yield return this;
+            yield break;
+        }
+        foreach (var e in Explore(levels - 1)) {
+            for (var d = 0; d < MainHash.CharSet.Length; d++) {
+                yield return e.Advance(d);
+            }
+        }
+    }
+    public IEnumerable<Tuple<HashState, int[]>> ExploreTraceVolatile(int levels) {
+        foreach (var e in ExploreDataVolatile(levels, levels)) {
+            yield return Tuple.Create(Advance(e), e);
         }
     }
 

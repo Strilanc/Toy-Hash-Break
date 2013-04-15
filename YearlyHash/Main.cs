@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Strilanc.LinqToCollections;
 
 public static class MainHash {
     public const string CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
@@ -9,7 +10,7 @@ public static class MainHash {
 
     public static void Main() {
         unchecked {
-            //var yy = new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu);
+            var passwordHash = new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu);
             //var zz = (from c in CharSet.Length.Range()
             //          from p in yy.InverseAdvance(c)
             //          select p).Distinct().ToArray();
@@ -21,9 +22,9 @@ public static class MainHash {
             //           from z in zz2
             //           from p in z.InverseAdvance(c)
             //           select p).Distinct().ToArray();
-            var k = "<+xcdf";
+            var k = "<+xcdfab";
             var x = Hash(Encode(k));
-            Hash4.Break(x, k.Length-2, Hash(Encode("<+")));
+            var r = 6.Range().Select(e => Hash4.Break(passwordHash, e, Hash(Encode("<+")))).ToArray();
             Console.WriteLine(FindIntermediate(Hash(Encode("<+")), new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu)).ToString());
             Console.ReadLine();
         }
