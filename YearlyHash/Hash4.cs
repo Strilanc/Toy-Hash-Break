@@ -127,7 +127,7 @@ static class Hash4 {
         var iters = 0;
         unchecked {
             foreach (var e in dataLin) {
-                for (var i = 0; i < 2; i++) {
+                for (var i = 0; i < 17; i++) {
                     a *= -6;
                     a += b;
                     a += offsetA;
@@ -144,9 +144,6 @@ static class Hash4 {
             }
         }
 
-        var s1 = a.ToString();
-        var s2 = b.ToString();
-        var sv = v.ToString();
         var va = a.Dot(v);
         var vb = b.Dot(v);
         return new HashState(va, vb);
@@ -160,8 +157,6 @@ static class Hash4 {
         var ss = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         var dataLin = Enumerable.Range(0, assumedLength).Select((e, i) => new Linear("val" + ss[i], 1)).ToArray();
         var iters = 0;
-        //var r = new List<Equation>();
-        //var u = new List<UnknownValue>();
         var eqs = new List<string>();
         var vars = new List<string>();
         unchecked {
@@ -226,18 +221,6 @@ static class Hash4 {
     }
     public static string BreakIntoIntegerProblem2(int resultA, int resultB, int assumedLength) {
         var inv3 = MathEx.MultiplicativeInverseS32(3);
-        //resultA = 0;
-        //resultB = 0;
-        //foreach (var i in 2.Range()) {
-        //    resultA *= -6;
-        //    resultA += resultB;
-        //    resultA += 0x74FA;
-        //    resultA -= 3;
-        //    resultB /= 3;
-        //    resultB += resultA;
-        //    resultB += 0x81BE;
-        //    resultB -= 3;
-        //}
 
         var a = new Linear();
         var b = new Linear();
@@ -246,8 +229,6 @@ static class Hash4 {
         var ss = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
         var dataLin = Enumerable.Range(0, assumedLength).Select((e, i) => new Linear("val" + ss[i], 1)).ToArray();
         var iters = 0;
-        //var r = new List<Equation>();
-        //var u = new List<UnknownValue>();
         var eqs = new List<string>();
         var vars = new List<string>();
         unchecked {
