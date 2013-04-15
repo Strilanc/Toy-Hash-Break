@@ -167,8 +167,8 @@ static class Hash4 {
         unchecked {
             foreach (var e in dataLin) {
                 vars.Add("val{0}".Inter(ss[iters]));
-                eqs.Add("+val{0} >= 0".Inter(ss[iters], MainHash.CharSet.Length));
-                eqs.Add("+val{0} < {1}".Inter(ss[iters], MainHash.CharSet.Length));
+                eqs.Add("+val{0} >= {1}".Inter(ss[iters], MainHash.MinDataValue));
+                eqs.Add("+val{0} <= {1}".Inter(ss[iters], MainHash.MaxDataValue));
                 foreach (var i in 17.Range()) {
                     a *= -6;
                     a += b;
@@ -253,8 +253,8 @@ static class Hash4 {
         unchecked {
             foreach (var e in dataLin) {
                 vars.Add("val{0}".Inter(ss[iters]));
-                eqs.Add("+val{0} >= 0".Inter(ss[iters], MainHash.CharSet.Length));
-                eqs.Add("+val{0} < {1}".Inter(ss[iters], MainHash.CharSet.Length));
+                eqs.Add("+val{0} >= {1}".Inter(ss[iters], MainHash.MinDataValue));
+                eqs.Add("+val{0} <= {1}".Inter(ss[iters], MainHash.MaxDataValue));
                 foreach (var i in 17.Range()) {
                     a *= -6;
                     a += b;
@@ -370,7 +370,7 @@ static class Hash4 {
         foreach (var dataIndex in assumedLength.Range().Skip(numExpandOutward).Reverse()) {
             var previousDataStates = states.Take(0).ToList();
             
-            foreach (var dataValue in MainHash.CharSet.Length.Range()) {
+            foreach (var dataValue in MainHash.DataRange) {
                 var roundStates = states.ToList();
                 foreach (var round in numRounds.Range().Reverse()) {
                     var previousRoundStates = roundStates.Take(0).ToList();
@@ -445,9 +445,10 @@ class Fequation {
 }
 class HashStateBloomFilter {
     private readonly Int32[] _bits;
-    private static Tuple<HashState, int, HashStateBloomFilter> _lastGenned;
+    private static HashState? _genState = null;
+    private static Dictionary<int, HashStateBloomFilter> _lastGenned = null;
     public HashStateBloomFilter(int power, double pFalsePositive) {
-        var n = (long)Math.Pow(MainHash.CharSet.Length, Math.Max(power, 3));
+        var n = (long)Math.Pow(MainHash.DataRange.Length, Math.Max(power, 2));
         var m = -(int)((n*Math.Log(pFalsePositive))/(Math.Log(2)*Math.Log(2)));
         var k = m * Math.Log(2) / n;
         m = 1 << (int)Math.Ceiling(Math.Log(m, 2));
@@ -455,8 +456,12 @@ class HashStateBloomFilter {
         this._bits = new int[m / 32];
     }
     public static HashStateBloomFilter Gen(HashState start, int pow, double pFalsePositive) {
-        if (_lastGenned != null && Equals(_lastGenned.Item1, start) && Equals(_lastGenned.Item2, pow))
-            return _lastGenned.Item3;
+        if (!Equals(_genState, start)) {
+            _genState = start;
+            _lastGenned = new Dictionary<int, HashStateBloomFilter>();
+        }
+        if (_lastGenned.ContainsKey(pow))
+            return _lastGenned[pow];
         HashStateBloomFilter x;
         if (pow == 4) {
             x = Gen4(start, pFalsePositive);
@@ -466,19 +471,18 @@ class HashStateBloomFilter {
                 x.Add(e);
             }
         }
-        _lastGenned = Tuple.Create(start, pow, x);
+        _lastGenned[pow] = x;
         return x;
     }
     public static HashStateBloomFilter Gen4(HashState start, double pFalsePositive) {
         var x = new HashStateBloomFilter(4, pFalsePositive);
-        var dLen = MainHash.CharSet.Length;
-        for (var d1 = 0; d1 < dLen; d1++) {
+        foreach (var d1 in MainHash.DataRange) {
             var start1 = start.Advance(d1);
-            for (var d2 = 0; d2 < dLen; d2++) {
+            foreach (var d2 in MainHash.DataRange) {
                 var start2 = start1.Advance(d2);
-                for (var d3 = 0; d3 < dLen; d3++) {
+                foreach (var d3 in MainHash.DataRange) {
                     var start3 = start2.Advance(d3);
-                    for (var d4 = 0; d4 < dLen; d4++) {
+                    foreach (var d4 in MainHash.DataRange) {
                         x.Add(start3.Advance(d4));
                     }
                 }

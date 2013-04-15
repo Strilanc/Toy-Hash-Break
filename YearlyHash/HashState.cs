@@ -35,7 +35,7 @@ public struct HashState {
             yield break;
         }
         foreach (var e in ExploreDataVolatile(levels - 1, n)) {
-            for (var d = 0; d < MainHash.CharSet.Length; d++) {
+            foreach (var d in MainHash.DataRange) {
                 e[levels - 1] = d;
                 yield return e;
             }
@@ -47,7 +47,7 @@ public struct HashState {
             yield break;
         }
         foreach (var e in Explore(levels - 1)) {
-            for (var d = 0; d < MainHash.CharSet.Length; d++) {
+            foreach (var d in MainHash.DataRange) {
                 yield return e.Advance(d);
             }
         }
