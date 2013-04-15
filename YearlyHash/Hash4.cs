@@ -310,11 +310,11 @@ static class Hash4 {
 
         return minimize + subjectTo + bounds + general + "End";
     }
-    public static void Break(HashState result, int assumedLength) {
+    public static void Break(HashState result, int assumedLength, HashState start = default(HashState)) {
         var inv3 = MathEx.MultiplicativeInverseS32(3);
 
-        var a = new Finear();
-        var b = new Finear();
+        var a = (Finear)start.A;
+        var b = (Finear)start.B;
         var eqs = ImmutableList.Create<Fequation>();
         unchecked {
             foreach (var i in assumedLength.Range()) {
@@ -327,7 +327,6 @@ static class Hash4 {
                     var k = new Finear(1 + assumedLength + i*17 + j, 1);
                     eqs = eqs.Add(new Fequation(b, k, 3));
                     b -= k;
-
 
                     b *= inv3;
                     b += a;
@@ -349,20 +348,32 @@ static class Hash4 {
             assignedDimensionIndexes = assignedDimensionIndexes.Add(1 + dataIndex);
             foreach (var round in numRounds.Range().Reverse()) {
                 assignedDimensionIndexes = assignedDimensionIndexes.Add(1 + assumedLength + dataIndex * 17 + round);
-                var ready = remainingEquations.Where(e => numDimensions.Range().All(i => (e.Left[i] == 0 && e.Right[i] == 0) || assignedDimensionIndexes.Contains(i))).ToArray();
+                var ready = 
+                    remainingEquations
+                    .Where(e => numDimensions.Range().All(i => (e.Left[i] == 0 && e.Right[i] == 0) || assignedDimensionIndexes.Contains(i)))
+                    .ToArray();
                 remainingEquations = remainingEquations.RemoveRange(ready);
                 equationsToCheck[dataIndex, round] = ready;
             }
         }
-        
+
+        var numExpandOutward = Math.Min(3, assumedLength);
+        var seeds = numExpandOutward
+            .Range()
+            .Aggregate(
+                new[] {new {state = start, data = ImmutableList.Create<int>()}},
+                (cur, _) => (from s in cur
+                             from e in MainHash.CharSet.Length.Range()
+                             select new {state = s.state.Advance(e), data = s.data.Add(e)}).ToArray())
+            .ToDictionary(e => e.state, e => e.data);
+
         var states = new[] {
             new {
                 h = result,
-                u = numDimensions.Range().ToImmutableList().SetItem(0, 1)
+                assignments = numDimensions.Range().ToImmutableList().SetItem(0, 1)
             }
         }.ToList();
-
-        foreach (var dataIndex in assumedLength.Range().Reverse()) {
+        foreach (var dataIndex in assumedLength.Range().Skip(numExpandOutward).Reverse()) {
             var previousDataStates = states.Take(0).ToList();
             
             foreach (var dataValue in MainHash.CharSet.Length.Range()) {
@@ -371,14 +382,14 @@ static class Hash4 {
                     var previousRoundStates = roundStates.Take(0).ToList();
 
                     foreach (var state in roundStates) {
-                        var mu = state.u.SetItem(1 + dataIndex, dataValue);
+                        var mu = state.assignments.SetItem(1 + dataIndex, dataValue);
 
                         foreach (var prevB in MathEx.InvDivS32(state.h.B - state.h.A - 0x81BE + dataValue, 3)) {
                             var nu = mu.SetItem(1 + assumedLength + dataIndex * 17 + round, prevB % 3);
                             foreach (var prevA in MathEx.InvMulS32(state.h.A - 0x74FA + dataValue - prevB, -6)
                                                         .Where(prevA => equationsToCheck[dataIndex, round]
                                                             .All(eq => eq.Satisfies(new Finear(nu.ToArray()))))) {
-                                previousRoundStates.Add(new { h = new HashState(prevA, prevB), u = nu });
+                                previousRoundStates.Add(new { h = new HashState(prevA, prevB), assignments = nu });
                             }
                         }
                     }
@@ -389,22 +400,12 @@ static class Hash4 {
             states = previousDataStates;
         }
 
-        var solution = states.FirstOrDefault(e => Equals(e.h, new HashState(0, 0)));
+        var solution = states.FirstOrDefault(e => seeds.ContainsKey(e.h));
         if (solution != null) {
-            var solutionR = solution.u.Skip(1).Take(assumedLength).Cast<int>().ToArray();
+            var solutionR = seeds[solution.h].Concat(solution.assignments.Skip(1 + numExpandOutward).Take(assumedLength - numExpandOutward)).ToArray();
 
             return;
         }
-
-        //u.Add(new UnknownValue("offA", 0x74FA));
-        //u.Add(new UnknownValue("offB", 0x81BE));
-        //u.Add(new UnknownValue("a", resultA));
-        //u.Add(new UnknownValue("b", resultB));
-
-        //// create equation system to solve
-        //r.Add(new Equation(a - new Linear("a", resultA)));
-        //r.Add(new Equation(b - new Linear("b", resultA)));
-
     }
 }
 class UnknownValue {

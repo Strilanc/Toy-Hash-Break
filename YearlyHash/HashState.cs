@@ -2,25 +2,17 @@
 using System.Linq;
 using System.Collections.Generic;
 
-public struct HashState : IEquatable<HashState> {
-    private readonly Int64 _state;
+public struct HashState {
+    public readonly Int32 A;
+    public readonly Int32 B;
 
     public HashState(Int32 a, Int32 b) {
-        unchecked {
-            _state = ((Int64)a << 32) | (b & 0xFFFFFFFFL);
-        }
+        this.A = a;
+        this.B = b;
     }
-    public Int32 A { get { return (Int32)((_state >> 32) & 0xFFFFFFFFL); } }
-    public Int32 B { get { return (Int32)(_state & 0xFFFFFFFFL); } }
 
-    public bool Equals(HashState other) {
-        return this._state == other._state;
-    }
-    public override bool Equals(Object obj) {
-        return obj is HashState && this.Equals((HashState)obj);
-    }
     public override int GetHashCode() {
-        return this._state.GetHashCode();
+        return A ^ B;
     }
     
     public HashState Advance(Int32 e) {
