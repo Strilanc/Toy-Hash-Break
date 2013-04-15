@@ -354,34 +354,44 @@ static class Hash4 {
                 equationsToCheck[dataIndex, round] = ready;
             }
         }
-
-        var finalState = new[] {
+        
+        var states = new[] {
             new {
-                ab = result,
-                assignments = numDimensions.Range().ToImmutableList().SetItem(0, 1)
+                h = result,
+                u = numDimensions.Range().ToImmutableList().SetItem(0, 1)
             }
-        }.ToArray();
-        var states = assumedLength.Range().Reverse().Aggregate(
-            finalState,
-            (afterValueStates, dataIndex) =>
-                (from dataValue in MainHash.CharSet.Length.Range()
-                 from roundState in numRounds.Range().Reverse().Aggregate(
-                     afterValueStates,
-                     (afterRoundStates, round) => 
-                         (from state in afterRoundStates
-                          from prevB in MathEx.InvDivS32(state.ab.B - state.ab.A - 0x81BE + dataValue, 3)
-                          from prevA in MathEx.InvMulS32(state.ab.A - 0x74FA + dataValue - prevB, -6)
-                          let assignments = state.assignments.SetItem(1 + dataIndex, dataValue)
-                                                             .SetItem(1 + assumedLength + dataIndex*17 + round, prevB%3)
-                          where equationsToCheck[dataIndex, round].All(eq => eq.Satisfies(new Finear(assignments.ToArray())))
-                          select new {ab = new HashState(prevA, prevB), assignments}
-                          ).ToArray())
-                 select roundState
-                 ).ToArray());
+        }.ToList();
 
-        var solution = states.FirstOrDefault(e => Equals(e.ab, new HashState(0, 0)));
+        foreach (var dataIndex in assumedLength.Range().Reverse()) {
+            var previousDataStates = states.Take(0).ToList();
+            
+            foreach (var dataValue in MainHash.CharSet.Length.Range()) {
+                var roundStates = states.ToList();
+                foreach (var round in numRounds.Range().Reverse()) {
+                    var previousRoundStates = roundStates.Take(0).ToList();
+
+                    foreach (var state in roundStates) {
+                        var mu = state.u.SetItem(1 + dataIndex, dataValue);
+
+                        foreach (var prevB in MathEx.InvDivS32(state.h.B - state.h.A - 0x81BE + dataValue, 3)) {
+                            var nu = mu.SetItem(1 + assumedLength + dataIndex * 17 + round, prevB % 3);
+                            foreach (var prevA in MathEx.InvMulS32(state.h.A - 0x74FA + dataValue - prevB, -6)
+                                                        .Where(prevA => equationsToCheck[dataIndex, round]
+                                                            .All(eq => eq.Satisfies(new Finear(nu.ToArray()))))) {
+                                previousRoundStates.Add(new { h = new HashState(prevA, prevB), u = nu });
+                            }
+                        }
+                    }
+                    roundStates = previousRoundStates;
+                }
+                previousDataStates.AddRange(roundStates);
+            }
+            states = previousDataStates;
+        }
+
+        var solution = states.FirstOrDefault(e => Equals(e.h, new HashState(0, 0)));
         if (solution != null) {
-            var solutionR = solution.assignments.Skip(1).Take(assumedLength).Cast<int>().ToArray();
+            var solutionR = solution.u.Skip(1).Take(assumedLength).Cast<int>().ToArray();
 
             return;
         }
