@@ -4,7 +4,7 @@ using System.Linq;
 using System.Numerics;
 
 public static class MathEx {
-    public static IEnumerable<Int32> InvDivS32(Int32 q, Int32 d) {
+    public static IEnumerable<Int32> InvDivS32(this Int32 q, Int32 d) {
         if (d <= 0) throw new ArgumentOutOfRangeException("d", "d <= 0");
         if (q < Int32.MinValue / d || q > Int32.MaxValue / d)
             yield break;
@@ -72,7 +72,7 @@ public static class MathEx {
         return (Int32)(UInt32)inv.Value;
     }
 
-    public static IEnumerable<Int32> InvMulS32(Int32 product, Int32 factor) {
+    public static IEnumerable<Int32> InvMulS32(this Int32 product, Int32 factor) {
         if (factor % 2 == 0) {
             if (product % 2 != 0)
                 yield break;

@@ -12,14 +12,11 @@ public static class MainHash {
 
     public static void Main() {
         unchecked {
-            Console.WriteLine(DataRange.Join(","));
+            Hash4.Break(Hash(Encode("iampied")), 7);
             var passwordHash = new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu);
             var nameHash1 = new HashState((int)0xAD414D7Du, (int)0x8CC36A67u);
             var nameHash2 = new HashState(0x605D4A4F, 0x7EDDB1E5);
             var nameHash3 = new HashState(0x3D10F092, 0x60084719);
-            var testHash = Hash(Encode("iampied"));
-            var test = 7.Range().Select(e => Hash4.Break(testHash, e)).FirstOrDefault(e => e != null);
-            Console.WriteLine("test: " + Decode(test));
             var rName1 = 7.Range().Select(e => Hash4.Break(nameHash1, e)).FirstOrDefault(e => e != null);
             Console.WriteLine("n1: " + Decode(rName1));
             var rName2 = 7.Range().Select(e => Hash4.Break(nameHash2, e)).FirstOrDefault(e => e != null);
@@ -28,6 +25,9 @@ public static class MainHash {
             Console.WriteLine("n3: " + Decode(rName3));
             var rPass = 7.Range().Select(e => Hash4.Break(passwordHash, e, Hash(Encode("<+")))).FirstOrDefault(e => e != null);
             Console.WriteLine("pass: " + Decode(rPass));
+            var testHash = Hash(Encode("iampied"));
+            var test = 7.Range().Select(e => Hash4.Break(testHash, e)).FirstOrDefault(e => e != null);
+            Console.WriteLine("test: " + Decode(test));
             Console.ReadLine();
         }
     }
