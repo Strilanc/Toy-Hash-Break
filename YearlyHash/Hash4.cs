@@ -359,6 +359,8 @@ static class Hash4 {
         var numExpandOutward = Math.Max(0, Math.Min(4, assumedLength - 1));
         var filter = HashStateBloomFilter.Gen(start, numExpandOutward, 0.001);
 
+        long xx = 0;
+        long yy = 0;
         var matches = new Dictionary<HashState, ImmutableList<int>>();
         Action<int, ImmutableList<int>, HashState> advanceData = null;
         Action<int, int, int, HashState, ImmutableList<int>> advanceRounds = null;
@@ -369,16 +371,21 @@ static class Hash4 {
             }
 
             var eqc = equationsToCheck[dataIndex, round];
+            xx -= 1;
             foreach (var prevB in (h.B - h.A - 0x81BE + dataValue).InvDivS32(3)) {
+                xx += 1;
                 var as3 = assignments.SetItem(1 + assumedLength + dataIndex * numRounds + round, prevB % 3);
                 if (eqc.Length > 0) {
                     var asf = new Finear(as3.ToArray());
-                    if (eqc.Any(eq => !eq.Satisfies(asf))) continue;
+                    if (eqc.Any(eq => !eq.Satisfies(asf))) {
+                        yy += 1;
+                        continue;
+                    }
                 }
+                xx -= 1;
                 foreach (var prevA in (h.A - 0x74FA + dataValue - prevB).InvMulS32(-6)) {
-                    //if (nnn.Contains(new HashState(prevA, prevB))) {
+                    xx += 1;
                     advanceRounds(dataIndex, dataValue, round - 1, new HashState(prevA, prevB), as3);
-                    //}
                 }
             }
         };
