@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Numerics;
 using Strilanc.LinqToCollections;
 using System.Collections.Immutable;
 
 class Finear {
     public readonly int[] Values;
-    public Finear(int[] values) {
+    public Finear(int[] values, bool optimize = true) {
         this.Values = values;
+        if (!optimize) return;
         var n = values.Length;
         while (n > 0 && values[n - 1] == 0) {
             n -= 1;
@@ -362,12 +362,15 @@ static class Hash4 {
 
         long xx = 0;
         var yy = new long[assumedLength, numRounds];
-        var matches = new Dictionary<HashState, ImmutableList<int>>();
-        Action<int, ImmutableList<int>, HashState> advanceData = null;
-        Action<int, int, int, HashState, ImmutableList<int>> advanceRounds = null;
-        advanceRounds = (dataIndex, dataValue, round, h, assignments) => {
+        var matches = new Dictionary<HashState, int[]>();
+        Action<int, HashState> advanceData = null;
+        Action<int, int, int, HashState> advanceRounds = null;
+        var assignments = new int[numDimensions];
+        assignments[0] = 1;
+        var af = new Finear(assignments, optimize: false);
+        advanceRounds = (dataIndex, dataValue, round, h) => {
             if (round == -1) {
-                advanceData(dataIndex - 1, assignments, h);
+                advanceData(dataIndex - 1, h);
                 return;
             }
 
@@ -389,49 +392,52 @@ static class Hash4 {
                 } else {
                     prevBs = new[] {n - 2, n - 1, n};
                 }
-                //if (!prevBs.SequenceEqual(q.InvDivS32(3).OrderBy(e => e))) throw new Exception();
             }
             foreach (var prevB in prevBs) {
-                xx += 1;
-                var as3 = assignments.SetItem(1 + assumedLength + dataIndex * numRounds + round, prevB % 3);
-                if (eqc.Length > 0) {
-                    var asf = new Finear(as3.ToArray());
-                    if (eqc.Any(eq => !eq.Satisfies(asf))) {
-                        yy[dataIndex, round] += 1;
-                        continue;
-                    }
-                }
-
-                xx -= 1;
-                int[] prevAs;
-                {
-                    var ax = h.A - 0x74FA + dataValue - prevB;
-                    if (ax%2 != 0) continue;
-                    ax /= 2;
-                    ax *= -inv3;
-                    prevAs = new[] {ax, ax ^ (1 << 31)};
-                    //if (!prevAs.OrderBy(e => e).SequenceEqual((h.A - 0x74FA + dataValue - prevB).InvMulS32(-6).OrderBy(e => e))) throw new Exception();
-                }
-                foreach (var prevA in prevAs) {
+                assignments[1 + assumedLength + dataIndex * numRounds + round] = prevB % 3;
+                try {
                     xx += 1;
-                    advanceRounds(dataIndex, dataValue, round - 1, new HashState(prevA, prevB), as3);
+                    if (eqc.Length > 0) {
+                        if (eqc.Any(eq => !eq.Satisfies(af))) {
+                            yy[dataIndex, round] += 1;
+                            continue;
+                        }
+                    }
+
+                    xx -= 1;
+                    int[] prevAs;
+                    {
+                        var ax = h.A - 0x74FA + dataValue - prevB;
+                        if (ax%2 != 0) continue;
+                        ax /= 2;
+                        ax *= -inv3;
+                        prevAs = new[] {ax, ax ^ (1 << 31)};
+                    }
+                    foreach (var prevA in prevAs) {
+                        xx += 1;
+                        advanceRounds(dataIndex, dataValue, round - 1, new HashState(prevA, prevB));
+                    }
+                } finally {
+                    assignments[1 + assumedLength + dataIndex*numRounds + round] = 0;
                 }
             }
         };
-        advanceData = (dataIndex, assignments, h) => {
+        advanceData = (dataIndex, h) => {
             if (dataIndex < numExpandOutward) {
                 if (filter.MayContain(h)) {
-                    matches[h] = assignments;
+                    matches[h] = assignments.ToArray();
                 }
                 return;
             }
 
             foreach (var dataValue in MainHash.DataRange) {
-                advanceRounds(dataIndex, dataValue, numRounds-1, h, assignments.SetItem(1 + dataIndex, dataValue));
+                assignments[1 + dataIndex] = dataValue;
+                advanceRounds(dataIndex, dataValue, numRounds-1, h);
+                assignments[1 + dataIndex] = 0;
             }
         };
 
-        advanceData(assumedLength - 1, Enumerable.Repeat(0, numDimensions).ToImmutableList().SetItem(0, 1), result);
+        advanceData(assumedLength - 1, result);
 
         if (matches.Count == 0) return null;
         var head = start.ExploreTraceVolatile(numExpandOutward).FirstOrDefault(e => matches.ContainsKey(e.Item1));
@@ -502,7 +508,9 @@ class HashStateBloomFilter {
         if (_lastGenned.ContainsKey(pow))
             return _lastGenned[pow];
         HashStateBloomFilter x;
-        if (pow == 4) {
+        if (pow == 5) {
+            x = Gen5(start, pFalsePositive);
+        } else if (pow == 4) {
             x = Gen4(start, pFalsePositive);
         } else {
             x = new HashStateBloomFilter(pow, pFalsePositive);
@@ -529,6 +537,25 @@ class HashStateBloomFilter {
         }
         return x;
     }
+    public static HashStateBloomFilter Gen5(HashState start, double pFalsePositive) {
+        var x = new HashStateBloomFilter(5, pFalsePositive);
+        foreach (var d1 in MainHash.DataRange) {
+            var start1 = start.Advance(d1);
+            foreach (var d2 in MainHash.DataRange) {
+                var start2 = start1.Advance(d2);
+                foreach (var d3 in MainHash.DataRange) {
+                    var start3 = start2.Advance(d3);
+                    foreach (var d4 in MainHash.DataRange) {
+                        var start4 = start3.Advance(d4);
+                        foreach (var d5 in MainHash.DataRange) {
+                            x.Add(start4.Advance(d5));
+                        }
+                    }
+                }
+            }
+        }
+        return x;
+    }
     public bool MayContain(HashState h) {
         var m = (_bits.Length << 6) - 1;
         var v1 = h.A & m;
@@ -537,12 +564,12 @@ class HashStateBloomFilter {
         var v4 = (v1 + v2) & m;
         var v5 = (v1 - v2) & m;
         var v6 = (h.A ^ (((h.B >> 16) & 0xFFFF) | (h.B << 16))) & m;
-        return ((_bits[v1 >> 6] >> (v1 & 63)) & 1) != 0
-            && ((_bits[v2 >> 6] >> (v2 & 63)) & 1) != 0
-            && ((_bits[v3 >> 6] >> (v3 & 63)) & 1) != 0
-            && ((_bits[v4 >> 6] >> (v4 & 63)) & 1) != 0
-            && ((_bits[v5 >> 6] >> (v5 & 63)) & 1) != 0
-            && ((_bits[v6 >> 6] >> (v6 & 63)) & 1) != 0;
+        return ((_bits[(uint)v1 >> 6] >> (v1 & 63)) & 1) != 0
+            && ((_bits[(uint)v2 >> 6] >> (v2 & 63)) & 1) != 0
+            && ((_bits[(uint)v3 >> 6] >> (v3 & 63)) & 1) != 0
+            && ((_bits[(uint)v4 >> 6] >> (v4 & 63)) & 1) != 0
+            && ((_bits[(uint)v5 >> 6] >> (v5 & 63)) & 1) != 0
+            && ((_bits[(uint)v6 >> 6] >> (v6 & 63)) & 1) != 0;
     }
     public void Add(HashState h) {
         var m = (_bits.Length << 6) - 1;
@@ -552,12 +579,12 @@ class HashStateBloomFilter {
         var v4 = (v1 + v2) & m;
         var v5 = (v1 - v2) & m;
         var v6 = (h.A ^ (((h.B >> 16) & 0xFFFF) | (h.B << 16))) & m;
-        _bits[v1 >> 6] |= 1ul << (v1 & 63);
-        _bits[v2 >> 6] |= 1ul << (v2 & 63);
-        _bits[v3 >> 6] |= 1ul << (v3 & 63);
-        _bits[v4 >> 6] |= 1ul << (v4 & 63);
-        _bits[v5 >> 6] |= 1ul << (v5 & 63);
-        _bits[v6 >> 6] |= 1ul << (v6 & 63);
+        _bits[(uint)v1 >> 6] |= 1ul << (v1 & 63);
+        _bits[(uint)v2 >> 6] |= 1ul << (v2 & 63);
+        _bits[(uint)v3 >> 6] |= 1ul << (v3 & 63);
+        _bits[(uint)v4 >> 6] |= 1ul << (v4 & 63);
+        _bits[(uint)v5 >> 6] |= 1ul << (v5 & 63);
+        _bits[(uint)v6 >> 6] |= 1ul << (v6 & 63);
     }
 }
 static class Util {

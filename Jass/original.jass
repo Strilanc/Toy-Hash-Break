@@ -157,4 +157,5 @@ call TriggerRegisterPlayerChatEvent( gg_trg_Password_Sys, Player(i), SubString(z
 set i=i+1
 endloop
 call TriggerAddCondition(gg_trg_Password_Sys,Condition(function gg_trg_Password_Sys_Conditions))
-call Trigger
+call TriggerAddAction( gg_trg_Password_Sys, function Trig_Password_Sys_Actions )
+endfunction

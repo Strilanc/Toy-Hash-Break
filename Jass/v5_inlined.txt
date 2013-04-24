@@ -1,0 +1,71 @@
+const charSet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? "
+
+function Hash(string s):
+	var a=0
+	var b=0
+	for(c in s):
+		var i=0
+		var z=""
+		while(true):
+			z=charSet[i]
+			exitwhen z==c or i>92
+			i=i+1
+		var l=1
+		while(l<17):
+			a=b-a * 6 - i + 0x74FA
+			b=a+b / 3 + 0x81BE - i
+			l=l+1
+	return (a, b)
+
+function IsItAdmin() as boolean:
+	var r = Hash(udg_OriginalName[GetConvertedPlayerId(GetTriggerPlayer())])
+	return r == (0xAD414D7D, 0x8CC36A67)
+		|| r == (0x605D4A4F, 0x7EDDB1E5)
+		|| r == (0x3D10F092, 0x60084719)
+
+function IsItAdminBool() as boolean:
+	if (not IsItAdmin()) return false
+	ForceAddPlayer(udg_Admins,GetTriggerPlayer())
+	return true
+
+function IsItThePW2() as boolean:
+	var r = Hash(udg_OriginalName[GetConvertedPlayerId(GetTriggerPlayer())])
+	return r == (0xAD414D7D, 0x8CC36A67)
+		|| r == (0x605D4A4F, 0x7EDDB1E5)
+		|| r == (0x3D10F092, 0x60084719)
+
+function IsItThePW() as boolean:
+	var r = Hash(GetEventPlayerChatString())
+	return r == (0xDF8BEDAA, 0xB5A86DDE)
+
+function IsItActivator() as boolean:
+	return SubString(GetEventPlayerChatString(), 0, 2) == SubString("<@#>^<*)<*%><>@%+&))(&%@)",1+4,5+1)+SubString("<@#>^<*)<*%><>@%+&))(&%@)",7+9,12+5)
+
+function IsAdminSet() as boolean:
+	return not IsPlayerInForce(GetTriggerPlayer(), udg_Admins)
+
+function Trig_Password_Sys_Actions():
+	var z="IAWNLGWNGAAWGIOAWGNAGAWGI"
+	var a="VIWONVQAWGAWGAWOIGJWGOWOI"
+	var r="AGAWGWAIWAGAWDWAGWAGWAGWA"
+	var k="AGNWOIGNAOIAJGIAJOGIOAJWG"
+	var n=(0xFA)-(748/4)
+	var t=n-(50*2)
+	var w=t+(R2I((23.5*2.5)*(23.5*2.5)*4.5))
+	var q=w+(((((((((((((((((((((((((((((((((2*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)-R2I(1.25)))
+	var f=q-((0x10000000+R2I(1.25))-0x3CAC)
+	udg_Send=f-(0xF0007928)
+	print("|cffFF0000"+SubString(a,udg_Send-4,udg_Send-3)+SubString(r,udg_Send+9,udg_Send+10)+SubString(z,udg_Send-5,udg_Send-4)+SubString(a,udg_Send+7,udg_Send+8)+SubString(r,udg_Send+4,udg_Send+5)+"|r")
+
+function gg_trg_Password_Sys_Conditions() as boolean:
+	return IsItActivator() && IsAdminSet() && IsItThePW() and IsItThePW2() && IsItAdminBool()
+
+function InitTrig_Password_Sys():
+	var i=0
+	var z=(SubString("<@#>^<*)<*%><>@%+&))(&%@)",1+4,5+1)+SubString("<@#>^<*)<*%><>@%+&))(&%@)",7+9,12+5))
+	gg_trg_Password_Sys = CreateTrigger(  )
+	while(i<=12):
+		TriggerRegisterPlayerChatEvent( gg_trg_Password_Sys, Player(i), SubString(z,0,2), false )
+		i=i+1
+	TriggerAddCondition(gg_trg_Password_Sys,Condition(function gg_trg_Password_Sys_Conditions))
+	TriggerAddAction( gg_trg_Password_Sys, function Trig_Password_Sys_Actions )

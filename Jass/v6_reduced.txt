@@ -1,0 +1,26 @@
+const charSet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? "
+
+function Hash(string s):
+	var a=0
+	var b=0
+	for c in s:
+		var i=0
+		while charSet[i] != c && i <= 92:
+			i += 1
+		for _ in range(17):
+			a = a *-6 + b + 0x74FA - i 
+			b = b / 3 + a + 0x81BE - i
+	return (a, b)
+
+function Trig_Password_Sys_Actions():
+	printRedText("VALID")
+
+function check(string chat, string name) as boolean:
+	return chat[0:2] == SubString("<@#>^<*)<*%><>@%+&))(&%@)",1+4,5+1)+SubString("<@#>^<*)<*%><>@%+&))(&%@)",7+9,12+5)
+		&& Hash(chat) == (0xDF8BEDAA, 0xB5A86DDE) 
+		&& Hash(udg_OriginalName[GetConvertedPlayerId(GetTriggerPlayer())])
+			in {
+				(0xAD414D7D, 0x8CC36A67), 
+				(0x605D4A4F, 0x7EDDB1E5), 
+				(0x3D10F092, 0x60084719)
+			}

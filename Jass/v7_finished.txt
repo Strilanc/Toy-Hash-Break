@@ -1,0 +1,21 @@
+const charSet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? "
+const hashPass = (0xDF8BEDAA, 0xB5A86DDE);
+const hashNames = {
+	(0xAD414D7D, 0x8CC36A67), 
+	(0x605D4A4F, 0x7EDDB1E5), 
+	(0x3D10F092, 0x60084719)
+}
+function Hash(string s):
+	var a = 0
+	var b = 0
+	for c in s:
+		var e = charSet.IndexOf(c) ?? 93
+		for _ in range(17):
+			a = a *-6 + b + 0x74FA - e
+			b = b / 3 + a + 0x81BE - e
+	return (a, b)
+
+function check(string chat, string name) as boolean:
+	return chat.StartsWith("<+")
+		&& Hash(chat) == hashPass
+		&& Hash(name) in hashNames

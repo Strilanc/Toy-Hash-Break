@@ -12,4 +12,8 @@ public class Hash4Test {
         var r = MainHash.Hash(MainHash.Encode("fjdhglfi"));
         Assert.AreEqual("glfi", MainHash.Decode(Hash4.Break(r, 4, MainHash.Hash(MainHash.Encode("fjdh")))));
     }
+    [TestMethod]
+    public void Name2Test() {
+        Assert.AreEqual(MainHash.Hash(MainHash.Encode("Procyon")), new HashState(0x605D4A4F, 0x7EDDB1E5));
+    }
 }
