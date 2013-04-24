@@ -12,6 +12,7 @@ public static class MainHash {
 
     public static void Main() {
         unchecked {
+            Hash4.Break(Hash(Encode("test")), 4);
             Hash4.Break(Hash(Encode("iampied")), 7);
             var passwordHash = new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu);
             var nameHash1 = new HashState((int)0xAD414D7Du, (int)0x8CC36A67u);

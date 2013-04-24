@@ -335,129 +335,72 @@ static class Hash4 {
         return eqs;
     }
     public static int[] Break(HashState result, int assumedLength, HashState start = default(HashState)) {
-        var inv3 = MathEx.MultiplicativeInverseS32(3);
         var numRounds = 17;
+        var eqs = GenerateConstraints(result, assumedLength, start);
 
-        var a = (Finear)start.A;
-        var b = (Finear)start.B;
-        var eqs = ImmutableList.Create<Fequation>();
-        unchecked {
-            foreach (var i in assumedLength.Range()) {
-                var e = new Finear(1 + i, 1);
-                foreach (var j in numRounds.Range()) {
-                    a *= -6;
-                    a += b;
-                    a += 0x74FA;
-                    a -= e;
-                    var k = new Finear(1 + assumedLength + i * numRounds + j, 1);
-                    eqs = eqs.Add(new Fequation(b, k, 3));
-                    b -= k;
-
-                    b *= inv3;
-                    b += a;
-                    b += 0x81BE;
-                    b -= e;
-                }
-            }
-        }
-
-        eqs = eqs.Add(new Fequation(a, result.A));
-        eqs = eqs.Add(new Fequation(b, result.B));
-
-        var numDimensions = 1 + assumedLength + assumedLength * numRounds;
-        var equationsToCheck = new Fequation[assumedLength, numRounds][];
-        var remainingEquations = eqs.SelectMany(e => e.BitSplit()).Where(e => !e.Right.Values.SequenceEqual(e.Left.Values)).ToImmutableList();
+        var bitSplitEquations = eqs.SelectMany(e => e.BitSplit()).Where(e => !e.Right.Values.SequenceEqual(e.Left.Values)).ToImmutableList();
+        var numDimensions = 1 + assumedLength + assumedLength*numRounds;
+        var equationsToCheck = new Fequation[assumedLength,numRounds][];
+        var remainingEquations = bitSplitEquations;
         var assignedDimensionIndexes = ImmutableHashSet.Create<int>().Add(0);
         foreach (var dataIndex in assumedLength.Range().Reverse()) {
             assignedDimensionIndexes = assignedDimensionIndexes.Add(1 + dataIndex);
             foreach (var round in numRounds.Range().Reverse()) {
-                assignedDimensionIndexes = assignedDimensionIndexes.Add(1 + assumedLength + dataIndex * numRounds + round);
-                var ready = 
+                assignedDimensionIndexes = assignedDimensionIndexes.Add(1 + assumedLength + dataIndex*numRounds + round);
+                var ready =
                     remainingEquations
-                    .Where(e => numDimensions.Range().All(i => (e.Left[i] == 0 && e.Right[i] == 0) || assignedDimensionIndexes.Contains(i)))
-                    .ToArray();
+                        .Where(e => numDimensions.Range().All(i => (e.Left[i] == 0 && e.Right[i] == 0) || assignedDimensionIndexes.Contains(i)))
+                        .ToArray();
                 remainingEquations = remainingEquations.RemoveRange(ready);
                 equationsToCheck[dataIndex, round] = ready;
             }
         }
 
-        var numExpandOutward = 0;// Math.Max(0, Math.Min(4, assumedLength - 1));
+        var numExpandOutward = Math.Max(0, Math.Min(4, assumedLength - 1));
         var filter = HashStateBloomFilter.Gen(start, numExpandOutward, 0.001);
 
-        //var sss = "iampied";
-        //var aaa = start.A;
-        //var bbb = start.B;
-        //var nnn = new List<HashState> { start };
-        //foreach (var e in MainHash.Encode(sss)) {
-        //    foreach (var _ in numRounds.Range()) {
-        //        aaa *= -6;
-        //        aaa += bbb;
-        //        aaa += 0x74FA;
-        //        aaa -= e;
-        //        bbb /= 3;
-        //        bbb += aaa;
-        //        bbb += 0x81BE;
-        //        bbb -= e;
-        //        nnn.Add(new HashState(aaa, bbb));
-        //    }
-        //}
-        //nnn.Add(result);
-
-        var states = new[] {
-            new {
-                h = result,
-                assignments = Enumerable.Repeat(0, numDimensions).ToImmutableList().SetItem(0, 1)
+        var matches = new Dictionary<HashState, ImmutableList<int>>();
+        Action<int, ImmutableList<int>, HashState> advanceData = null;
+        Action<int, int, int, HashState, ImmutableList<int>> advanceRounds = null;
+        advanceRounds = (dataIndex, dataValue, round, h, assignments) => {
+            if (round == -1) {
+                advanceData(dataIndex - 1, assignments, h);
+                return;
             }
-        }.ToList();
-        foreach (var dataIndex in assumedLength.Range().Skip(numExpandOutward).Reverse()) {
-            var previousDataStates = states.Take(0).ToList();
-            
-            foreach (var dataValue in MainHash.DataRange) {
-                var roundStates = states.ToList();
-                foreach (var round in numRounds.Range().Reverse()) {
-                    var previousRoundStates = roundStates.Take(0).ToList();
-                    var eqc = equationsToCheck[dataIndex, round];
 
-                    foreach (var state in roundStates) {
-                        var as2 = state.assignments.SetItem(1 + dataIndex, dataValue);
-
-                        foreach (var prevB in (state.h.B - state.h.A - 0x81BE + dataValue).InvDivS32(3)) {
-                            var as3 = as2.SetItem(1 + assumedLength + dataIndex * numRounds + round, prevB % 3);
-                            if (eqc.Length > 0) {
-                                var asf = new Finear(as3.ToArray());
-                                if (eqc.Any(eq => !eq.Satisfies(asf))) {
-                                    //foreach (var prevA in (state.h.A - 0x74FA + dataValue - prevB).InvMulS32(-6)) {
-                                    //    if (nnn.Contains(new HashState(prevA, prevB))) {
-                                    //        var rrrr = 0;
-                                    //    }
-                                    //}
-                                    continue;
-                                }
-                            }
-                            foreach (var prevA in (state.h.A - 0x74FA + dataValue - prevB).InvMulS32(-6)) {
-                                //if (nnn.Contains(new HashState(prevA, prevB))) {
-                                    previousRoundStates.Add(new {h = new HashState(prevA, prevB), assignments = as3});
-                                //}
-                            }
-                        }
-                    }
-                    roundStates = previousRoundStates;
+            var eqc = equationsToCheck[dataIndex, round];
+            foreach (var prevB in (h.B - h.A - 0x81BE + dataValue).InvDivS32(3)) {
+                var as3 = assignments.SetItem(1 + assumedLength + dataIndex * numRounds + round, prevB % 3);
+                if (eqc.Length > 0) {
+                    var asf = new Finear(as3.ToArray());
+                    if (eqc.Any(eq => !eq.Satisfies(asf))) continue;
                 }
-                var rrr = (dataIndex == numExpandOutward
-                              ? roundStates.Where(e => filter.MayContain(e.h))
-                              : roundStates); //.ToArray();
-                //if (roundStates.Any(previousDataStates.Contains) && !rrr.Any(previousDataStates.Contains)) {
-                //    var xxx = 0;
-                //}
-                previousDataStates.AddRange(rrr);
+                foreach (var prevA in (h.A - 0x74FA + dataValue - prevB).InvMulS32(-6)) {
+                    //if (nnn.Contains(new HashState(prevA, prevB))) {
+                    advanceRounds(dataIndex, dataValue, round - 1, new HashState(prevA, prevB), as3);
+                    //}
+                }
             }
-            states = previousDataStates;
-        }
+        };
+        advanceData = (dataIndex, assignments, h) => {
+            if (dataIndex < numExpandOutward) {
+                if (filter.MayContain(h)) {
+                    matches[h] = assignments;
+                }
+                return;
+            }
 
-        var tails = states.ToDictionary(e => e.h, e => e.assignments);
-        if (tails.Count == 0) return null;
-        var head = start.ExploreTraceVolatile(numExpandOutward).FirstOrDefault(e => tails.ContainsKey(e.Item1));
-        return head == null ? null : head.Item2.Concat(tails[head.Item1].Skip(1 + numExpandOutward).Take(assumedLength - numExpandOutward)).ToArray();
+            foreach (var dataValue in MainHash.DataRange) {
+                advanceRounds(dataIndex, dataValue, numRounds-1, h, assignments.SetItem(1 + dataIndex, dataValue));
+            }
+        };
+
+        advanceData(assumedLength - 1, Enumerable.Repeat(0, numDimensions).ToImmutableList().SetItem(0, 1), result);
+
+        if (matches.Count == 0) return null;
+        var head = start.ExploreTraceVolatile(numExpandOutward).FirstOrDefault(e => matches.ContainsKey(e.Item1));
+        var x = head == null ? null : head.Item2.Concat(matches[head.Item1].Skip(1 + numExpandOutward).Take(assumedLength - numExpandOutward)).ToArray();
+        return x;
     }
 }
 class UnknownValue {
@@ -503,17 +446,17 @@ class Fequation {
     }
 }
 class HashStateBloomFilter {
-    private readonly Int32[] _bits;
+    private readonly ulong[] _bits;
     private static HashState? _genState;
     private static Dictionary<int, HashStateBloomFilter> _lastGenned;
     public HashStateBloomFilter(int power, double pFalsePositive) {
         var n = (long)Math.Pow(MainHash.DataRange.Length, Math.Max(power, 2));
-        var m = -(int)((n*Math.Log(pFalsePositive))/(Math.Log(2)*Math.Log(2)));
+        var m = -(long)((n * Math.Log(pFalsePositive)) / (Math.Log(2) * Math.Log(2)));
         var k = m * Math.Log(2) / n;
-        m = 1 << (int)Math.Ceiling(Math.Log(m, 2));
-        if (m < 0) m = 1 << 30;
+        m = 1L << (int)Math.Ceiling(Math.Log(m, 2));
+        m = Math.Min(m, 1L << 32);
         if (m < 32) m = 32;
-        this._bits = new int[m / 32];
+        this._bits = new ulong[m >> 6];
     }
     public static HashStateBloomFilter Gen(HashState start, int pow, double pFalsePositive) {
         if (!Equals(_genState, start)) {
@@ -551,34 +494,34 @@ class HashStateBloomFilter {
         return x;
     }
     public bool MayContain(HashState h) {
-        var m = (_bits.Length << 5) - 1;
+        var m = (_bits.Length << 6) - 1;
         var v1 = h.A & m;
         var v2 = h.B & m;
         var v3 = (v1 ^ v2) & m;
         var v4 = (v1 + v2) & m;
         var v5 = (v1 - v2) & m;
         var v6 = (h.A ^ (((h.B >> 16) & 0xFFFF) | (h.B << 16))) & m;
-        return ((_bits[v1 >> 5] >> (v1 & 31)) & 1) != 0
-            && ((_bits[v2 >> 5] >> (v2 & 31)) & 1) != 0
-            && ((_bits[v3 >> 5] >> (v3 & 31)) & 1) != 0
-            && ((_bits[v4 >> 5] >> (v4 & 31)) & 1) != 0
-            && ((_bits[v5 >> 5] >> (v5 & 31)) & 1) != 0
-            && ((_bits[v6 >> 5] >> (v6 & 31)) & 1) != 0;
+        return ((_bits[v1 >> 6] >> (v1 & 63)) & 1) != 0
+            && ((_bits[v2 >> 6] >> (v2 & 63)) & 1) != 0
+            && ((_bits[v3 >> 6] >> (v3 & 63)) & 1) != 0
+            && ((_bits[v4 >> 6] >> (v4 & 63)) & 1) != 0
+            && ((_bits[v5 >> 6] >> (v5 & 63)) & 1) != 0
+            && ((_bits[v6 >> 6] >> (v6 & 63)) & 1) != 0;
     }
     public void Add(HashState h) {
-        var m = (_bits.Length << 5) - 1;
+        var m = (_bits.Length << 6) - 1;
         var v1 = h.A & m;
         var v2 = h.B & m;
         var v3 = (v1 ^ v2) & m;
         var v4 = (v1 + v2) & m;
         var v5 = (v1 - v2) & m;
         var v6 = (h.A ^ (((h.B >> 16) & 0xFFFF) | (h.B << 16))) & m;
-        _bits[v1 >> 5] |= 1 << (v1 & 31);
-        _bits[v2 >> 5] |= 1 << (v2 & 31);
-        _bits[v3 >> 5] |= 1 << (v3 & 31);
-        _bits[v4 >> 5] |= 1 << (v4 & 31);
-        _bits[v5 >> 5] |= 1 << (v5 & 31);
-        _bits[v6 >> 5] |= 1 << (v6 & 31);
+        _bits[v1 >> 6] |= 1ul << (v1 & 63);
+        _bits[v2 >> 6] |= 1ul << (v2 & 63);
+        _bits[v3 >> 6] |= 1ul << (v3 & 63);
+        _bits[v4 >> 6] |= 1ul << (v4 & 63);
+        _bits[v5 >> 6] |= 1ul << (v5 & 63);
+        _bits[v6 >> 6] |= 1ul << (v6 & 63);
     }
 }
 static class Util {
@@ -634,5 +577,17 @@ static class Util {
             s = Enumerable.Repeat(".", n).Concat(s.Skip(n));
             return string.Join("", s);
         }
+    }
+    public static T ChooseRandom<T>(this IReadOnlyList<T> list, Random rng) {
+        return list[rng.Next(list.Count)];
+    }
+    public static T ChooseScanRandom<T>(this IEnumerable<T> list, Random rng) {
+        return list.ToArray().ChooseRandom(rng);
+    }
+    public static HashSet<T> ToSet<T>(this IEnumerable<T> x) {
+        return new HashSet<T>(x);
+    }
+    public static Stack<T> ToStack<T>(this IEnumerable<T> x) {
+        return new Stack<T>(x);
     }
 }
