@@ -335,6 +335,7 @@ static class Hash4 {
         return eqs;
     }
     public static int[] Break(HashState result, int assumedLength, HashState start = default(HashState)) {
+        var inv3 = MathEx.MultiplicativeInverseS32(3);
         var numRounds = 17;
         var eqs = GenerateConstraints(result, assumedLength, start);
 
@@ -360,7 +361,7 @@ static class Hash4 {
         var filter = HashStateBloomFilter.Gen(start, numExpandOutward, 0.001);
 
         long xx = 0;
-        long yy = 0;
+        var yy = new long[assumedLength, numRounds];
         var matches = new Dictionary<HashState, ImmutableList<int>>();
         Action<int, ImmutableList<int>, HashState> advanceData = null;
         Action<int, int, int, HashState, ImmutableList<int>> advanceRounds = null;
@@ -372,18 +373,46 @@ static class Hash4 {
 
             var eqc = equationsToCheck[dataIndex, round];
             xx -= 1;
-            foreach (var prevB in (h.B - h.A - 0x81BE + dataValue).InvDivS32(3)) {
+
+            int[] prevBs;
+            {
+                var q = h.B - h.A - 0x81BE + dataValue;
+                if (q < Int32.MinValue/3 || q > Int32.MaxValue/3) return;
+
+                var n = q*3;
+                if (n == 0) {
+                    prevBs = new[] {-2, -1, 0, +1, +2};
+                } else if (q == Int32.MaxValue/3) {
+                    prevBs = new[] {n, n + 1};
+                } else if (n > 0) {
+                    prevBs = new[] { n, n + 1, n + 2 };
+                } else {
+                    prevBs = new[] {n - 2, n - 1, n};
+                }
+                //if (!prevBs.SequenceEqual(q.InvDivS32(3).OrderBy(e => e))) throw new Exception();
+            }
+            foreach (var prevB in prevBs) {
                 xx += 1;
                 var as3 = assignments.SetItem(1 + assumedLength + dataIndex * numRounds + round, prevB % 3);
                 if (eqc.Length > 0) {
                     var asf = new Finear(as3.ToArray());
                     if (eqc.Any(eq => !eq.Satisfies(asf))) {
-                        yy += 1;
+                        yy[dataIndex, round] += 1;
                         continue;
                     }
                 }
+
                 xx -= 1;
-                foreach (var prevA in (h.A - 0x74FA + dataValue - prevB).InvMulS32(-6)) {
+                int[] prevAs;
+                {
+                    var ax = h.A - 0x74FA + dataValue - prevB;
+                    if (ax%2 != 0) continue;
+                    ax /= 2;
+                    ax *= -inv3;
+                    prevAs = new[] {ax, ax ^ (1 << 31)};
+                    //if (!prevAs.OrderBy(e => e).SequenceEqual((h.A - 0x74FA + dataValue - prevB).InvMulS32(-6).OrderBy(e => e))) throw new Exception();
+                }
+                foreach (var prevA in prevAs) {
                     xx += 1;
                     advanceRounds(dataIndex, dataValue, round - 1, new HashState(prevA, prevB), as3);
                 }
