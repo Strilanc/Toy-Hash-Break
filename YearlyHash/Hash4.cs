@@ -361,6 +361,8 @@ static class Hash4 {
         var filter = HashStateBloomFilter.Gen(start, numExpandOutward, 0.001);
 
         long xx = 0;
+        long nn = 0;
+        var yyf = new long[assumedLength, numRounds];
         var yy = new long[assumedLength, numRounds];
         var matches = new Dictionary<HashState, int[]>();
         Action<int, HashState> advanceData = null;
@@ -380,46 +382,45 @@ static class Hash4 {
             int[] prevBs;
             {
                 var q = h.B - h.A - 0x81BE + dataValue;
-                if (q < Int32.MinValue/3 || q > Int32.MaxValue/3) return;
+                if (q < Int32.MinValue / 3 || q > Int32.MaxValue / 3) return;
 
-                var n = q*3;
+                var n = q * 3;
                 if (n == 0) {
-                    prevBs = new[] {-2, -1, 0, +1, +2};
-                } else if (q == Int32.MaxValue/3) {
-                    prevBs = new[] {n, n + 1};
+                    prevBs = new[] { -2, -1, 0, +1, +2 };
+                } else if (q == Int32.MaxValue / 3) {
+                    prevBs = new[] { n, n + 1 };
                 } else if (n > 0) {
                     prevBs = new[] { n, n + 1, n + 2 };
                 } else {
-                    prevBs = new[] {n - 2, n - 1, n};
+                    prevBs = new[] { n - 2, n - 1, n };
                 }
             }
-            foreach (var prevB in prevBs) {
-                assignments[1 + assumedLength + dataIndex * numRounds + round] = prevB % 3;
-                try {
+            try {
+                foreach (var prevB in prevBs) {
+                    assignments[1 + assumedLength + dataIndex * numRounds + round] = prevB % 3;
                     xx += 1;
-                    if (eqc.Length > 0) {
-                        if (eqc.Any(eq => !eq.Satisfies(af))) {
-                            yy[dataIndex, round] += 1;
-                            continue;
-                        }
+                    yyf[dataIndex, round] += 1;
+                    if (eqc.Length > 0 && eqc.Any(eq => !eq.Satisfies(af))) {
+                        yy[dataIndex, round] += 1;
+                        continue;
                     }
 
                     xx -= 1;
                     int[] prevAs;
                     {
                         var ax = h.A - 0x74FA + dataValue - prevB;
-                        if (ax%2 != 0) continue;
+                        if (ax % 2 != 0) continue;
                         ax /= 2;
                         ax *= -inv3;
-                        prevAs = new[] {ax, ax ^ (1 << 31)};
+                        prevAs = new[] { ax, ax ^ (1 << 31) };
                     }
                     foreach (var prevA in prevAs) {
                         xx += 1;
                         advanceRounds(dataIndex, dataValue, round - 1, new HashState(prevA, prevB));
                     }
-                } finally {
-                    assignments[1 + assumedLength + dataIndex*numRounds + round] = 0;
                 }
+            } finally {
+                assignments[1 + assumedLength + dataIndex * numRounds + round] = 0;
             }
         };
         advanceData = (dataIndex, h) => {
@@ -433,8 +434,21 @@ static class Hash4 {
             foreach (var dataValue in MainHash.DataRange) {
                 assignments[1 + dataIndex] = dataValue;
                 advanceRounds(dataIndex, dataValue, numRounds-1, h);
-                assignments[1 + dataIndex] = 0;
+
+                nn += 1;
+                if (nn == 100000) {
+                    nn = 0;
+                    Console.WriteLine(string.Join(", ", assignments.Skip(1).Take(assumedLength).Skip(numExpandOutward).Reverse()));
+                    Console.WriteLine(string.Join(
+                        Environment.NewLine,
+                        assumedLength.Range().Skip(numExpandOutward).Select(
+                            d => string.Join(
+                                ", ",
+                                numRounds.Range().Select(
+                                    r => yyf[d, r] == 0 ? "----" : (yy[d, r] / (double)yyf[d, r]).ToString("0.00"))))));
+                }
             }
+            assignments[1 + dataIndex] = 0;
         };
 
         advanceData(assumedLength - 1, result);

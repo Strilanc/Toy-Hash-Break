@@ -23,20 +23,21 @@ public static class MainHash {
             //Console.WriteLine("n2: " + Decode(rName2));
             Console.WriteLine("n2: Hash({0}): {1} == {2}", "Procyon", Hash(Encode("Procyon")), nameHash2);
 
-            var rName1 = 10.Range().Select(e => Hash4.Break(nameHash1, e)).FirstOrDefault(e => e != null);
-            Console.WriteLine("n1: " + Decode(rName1));
+            //var rName1 = 9.Range().Select(e => Hash4.Break(nameHash1, e)).FirstOrDefault(e => e != null);
+            //Console.WriteLine("n1: " + Decode(rName1));
 
 
-            var rName3 = 10.Range().Select(e => Hash4.Break(nameHash3, e)).FirstOrDefault(e => e != null);
-            Console.WriteLine("n3: " + Decode(rName3));
-
-            var rPass = 10.Range().Select(e => Hash4.Break(passwordHash, e, Hash(Encode("<+")))).FirstOrDefault(e => e != null);
+            var rPass = 9.Range().Select(e => Hash4.Break(passwordHash, e, Hash(Encode("<+")))).FirstOrDefault(e => e != null);
             Console.WriteLine("pass: " + Decode(rPass));
+
+            //var rName3 = 9.Range().Select(e => Hash4.Break(nameHash3, e)).FirstOrDefault(e => e != null);
+            //Console.WriteLine("n3: " + Decode(rName3));
+
             
-            var testHash = Hash(Encode("iampied"));
-            var test = 7.Range().Select(e => Hash4.Break(testHash, e)).FirstOrDefault(e => e != null);
-            Console.WriteLine("test: " + Decode(test));
-            Console.WriteLine("done");
+            //var testHash = Hash(Encode("iampied"));
+            //var test = 7.Range().Select(e => Hash4.Break(testHash, e)).FirstOrDefault(e => e != null);
+            //Console.WriteLine("test: " + Decode(test));
+            //Console.WriteLine("done");
 
             Console.ReadLine();
         }
