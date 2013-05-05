@@ -6,28 +6,40 @@ using Strilanc.LinqToCollections;
 public static class MainHash {
     public const string CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
     public const char CharNotInSet = 'Ʉ';
+    //public static readonly Int32[] DataRange = Encode(CharSet + CharNotInSet).ToArray();
     public static readonly Int32[] DataRange = Encode(CharSet + CharNotInSet).ToArray();
     public static readonly Int32 MaxDataValue = DataRange.Max();
     public static readonly Int32 MinDataValue = DataRange.Min();
 
     public static void Main() {
         unchecked {
-            Hash4.Break(Hash(Encode("iampied")), 7);
+            var x = Hash4.Break(Hash(Encode("aaaaaaaaa")), 9);
             var passwordHash = new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu);
             var nameHash1 = new HashState((int)0xAD414D7Du, (int)0x8CC36A67u);
-            var nameHash2 = new HashState(0x605D4A4F, 0x7EDDB1E5);
+            var nameHash2 = new HashState(0x605D4A4F, 0x7EDDB1E5); // Procyon
             var nameHash3 = new HashState(0x3D10F092, 0x60084719);
-            var rName1 = 7.Range().Select(e => Hash4.Break(nameHash1, e)).FirstOrDefault(e => e != null);
-            Console.WriteLine("n1: " + Decode(rName1));
-            var rName2 = 7.Range().Select(e => Hash4.Break(nameHash2, e)).FirstOrDefault(e => e != null);
-            Console.WriteLine("n2: " + Decode(rName2));
-            var rName3 = 7.Range().Select(e => Hash4.Break(nameHash3, e)).FirstOrDefault(e => e != null);
-            Console.WriteLine("n3: " + Decode(rName3));
-            var rPass = 7.Range().Select(e => Hash4.Break(passwordHash, e, Hash(Encode("<+")))).FirstOrDefault(e => e != null);
+
+            //var rName2 = 9.Range().Select(e => Hash4.Break(nameHash2, e)).FirstOrDefault(e => e != null);
+            //Console.WriteLine("n2: " + Decode(rName2));
+            Console.WriteLine("n2: Hash({0}): {1} == {2}", "Procyon", Hash(Encode("Procyon")), nameHash2);
+
+            //var rName1 = 9.Range().Select(e => Hash4.Break(nameHash1, e)).FirstOrDefault(e => e != null);
+            //Console.WriteLine("n1: " + Decode(rName1));
+
+
+            //var rPass = 9.Range().Select(e => Hash4.Break(passwordHash, e, Hash(Encode("<+")))).FirstOrDefault(e => e != null);
+            var rPass = Hash4.Break(passwordHash, 9, Hash(Encode("<+")));
             Console.WriteLine("pass: " + Decode(rPass));
-            var testHash = Hash(Encode("iampied"));
-            var test = 7.Range().Select(e => Hash4.Break(testHash, e)).FirstOrDefault(e => e != null);
-            Console.WriteLine("test: " + Decode(test));
+
+            //var rName3 = 9.Range().Select(e => Hash4.Break(nameHash3, e)).FirstOrDefault(e => e != null);
+            //Console.WriteLine("n3: " + Decode(rName3));
+
+            
+            //var testHash = Hash(Encode("iampied"));
+            //var test = 7.Range().Select(e => Hash4.Break(testHash, e)).FirstOrDefault(e => e != null);
+            //Console.WriteLine("test: " + Decode(test));
+            //Console.WriteLine("done");
+
             Console.ReadLine();
         }
     }

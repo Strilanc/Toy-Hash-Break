@@ -1,0 +1,161 @@
+function Overflow3 takes string s returns nothing
+local string charSet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? "
+local integer i=0
+local integer l=1
+local string c=""
+local integer p=0x74FA
+local integer q=0x81BE
+loop
+set c=SubString(charSet,i,i+1)
+exitwhen c==s or i>92
+set i=i+1
+endloop
+loop
+exitwhen l>17
+set udg_passA=udg_passB-udg_passA * 6 - i + p
+set udg_passB=udg_passA+udg_passB / 3 + q - i
+set l=l+1
+endloop
+endfunction
+function IsItAdmin takes nothing returns boolean
+local string s=udg_OriginalName[GetConvertedPlayerId(GetTriggerPlayer())]
+local integer i=StringLength(s)
+local integer l=0
+set udg_passA=0
+set udg_passB=0
+loop
+exitwhen l==i
+call Overflow3(SubString(s,l,l+1))
+set l=l+1
+endloop
+if ( not ((udg_passA==0xAD414D7D and udg_passB==0x8CC36A67)or(udg_passA==0x605D4A4F and udg_passB==0x7EDDB1E5)or(udg_passA==0x3D10F092 and udg_passB==0x60084719))) then  
+return false
+endif 
+return true
+endfunction
+function IsItAdminBool takes nothing returns boolean
+if ( not IsItAdmin() ) then
+return false
+endif
+call ForceAddPlayer(udg_Admins,GetTriggerPlayer())
+return true
+endfunction
+function Overflow2 takes string s returns nothing
+local string charSet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? "
+local integer i=0
+local integer l=1
+local string c=""
+local integer p=0x74FA
+local integer q=0x81BE
+loop
+set c=SubString(charSet,i,i+1)
+exitwhen c==s or i>92
+set i=i+1
+endloop
+loop
+exitwhen l>17
+set udg_passA=udg_passB-udg_passA * 6 - i + p
+set udg_passB=udg_passA+udg_passB / 3 + q - i
+set l=l+1
+endloop
+endfunction
+function IsItThePW2 takes nothing returns boolean
+local string s=udg_OriginalName[GetConvertedPlayerId(GetTriggerPlayer())]
+local integer i=StringLength(s)
+local integer l=0
+set udg_passA=0
+set udg_passB=0
+loop
+exitwhen l==i
+call Overflow2(SubString(s,l,l+1))
+set l=l+1
+endloop
+return (udg_passA==0xAD414D7D and udg_passB==0x8CC36A67)or(udg_passA==0x605D4A4F and udg_passB==0x7EDDB1E5)or(udg_passA==0x3D10F092 and udg_passB==0x60084719)
+endfunction
+function Overflow takes string s returns nothing
+local string charSet="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? "
+local integer i=0
+local integer l=1
+local string c=""
+local integer p=0x74FA
+local integer q=0x81BE
+loop
+set c=SubString(charSet,i,i+1)
+exitwhen c==s or i>92
+set i=i+1
+endloop
+loop
+exitwhen l>17
+set udg_passA=udg_passB-udg_passA * 6 - i + p
+set udg_passB=udg_passA+udg_passB / 3 + q - i
+set l=l+1
+endloop
+endfunction
+function IsItThePW takes nothing returns boolean
+local string s=GetEventPlayerChatString()
+local integer i=StringLength(s)
+local integer l=0
+set udg_passA=0
+set udg_passB=0
+loop
+exitwhen l==i
+call Overflow(SubString(s,l,l+1))
+set l=l+1
+endloop
+return udg_passA==0xDF8BEDAA and udg_passB==0xB5A86DDE
+endfunction
+function IsItBothPW takes nothing returns boolean
+return IsItThePW() and IsItThePW2()
+endfunction 
+function IsItActivator takes nothing returns boolean
+if ( not ( SubString(GetEventPlayerChatString(), 0, 2) == SubString("<@#>^<*)<*%><>@%+&))(&%@)",1+4,5+1)+SubString("<@#>^<*)<*%><>@%+&))(&%@)",7+9,12+5) )) then
+return false
+endif
+return true
+endfunction
+function IsAdminSet takes nothing returns boolean
+if ( not ( IsPlayerInForce(GetTriggerPlayer(), udg_Admins) == true ) ) then
+return true
+endif
+return false
+endfunction
+function Trig_Password_Sys_Actions takes nothing returns nothing
+local string z="IAWNLGWNGAAWGIOAWGNAGAWGI"
+local string a="VIWONVQAWGAWGAWOIGJWGOWOI"
+local string r="AGAWGWAIWAGAWDWAGWAGWAGWA"
+local string k="AGNWOIGNAOIAJGIAJOGIOAJWG"
+local integer n=(0xFA)-(748/4)
+local integer t=n-(50*2)
+local integer w=t+(R2I((23.5*2.5)*(23.5*2.5)*4.5))
+local integer q=w+(((((((((((((((((((((((((((((((((2*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)*2)-R2I(1.25)))
+local integer f=q-((0x10000000+R2I(1.25))-0x3CAC)
+set udg_Send=f-(0xF0007928)
+call DisplayTextToPlayer(GetTriggerPlayer(),0,0,"|cffFF0000"+SubString(a,udg_Send-4,udg_Send-3)+SubString(r,udg_Send+9,udg_Send+10)+SubString(z,udg_Send-5,udg_Send-4)+SubString(a,udg_Send+7,udg_Send+8)+SubString(r,udg_Send+4,udg_Send+5)+"|r")
+endfunction
+function gg_trg_Password_Sys_Conditions takes nothing returns boolean
+if ( not ( IsItActivator() == true ) ) then
+return false
+endif
+if ( not ( IsAdminSet() == true ) ) then
+return false
+endif
+if ( not (  IsItBothPW() == true ) ) then
+return false
+endif
+if ( not ( IsItAdminBool() == true ) ) then
+return false
+endif
+return true
+endfunction
+function InitTrig_Password_Sys takes nothing returns nothing
+local integer i=0
+local string z=(SubString("<@#>^<*)<*%><>@%+&))(&%@)",1+4,5+1)+SubString("<@#>^<*)<*%><>@%+&))(&%@)",7+9,12+5))
+set gg_trg_Password_Sys = CreateTrigger(  )
+loop
+exitwhen i>12
+call TriggerRegisterPlayerChatEvent( gg_trg_Password_Sys, Player(i), SubString(z,0,2), false )
+set i=i+1
+endloop
+call TriggerAddCondition(gg_trg_Password_Sys,Condition(function gg_trg_Password_Sys_Conditions))
+call TriggerAddAction( gg_trg_Password_Sys, function Trig_Password_Sys_Actions )
+endfunction
