@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-static class Hash3 {
+public static class Hash3 {
     public static HashState Hash(IEnumerable<Int32> data) {
         var i3 = MathEx.MultiplicativeInverseS32(3);
         var i3p17 = i3.Pow(17);

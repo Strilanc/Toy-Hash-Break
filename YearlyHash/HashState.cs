@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using Strilanc.LinqToCollections;
 
 public struct HashState {
     public readonly Int32 A;
@@ -52,6 +53,20 @@ public struct HashState {
             }
         }
     }
+    public IEnumerable<HashState> ExploreReverse(int levels) {
+        if (levels <= 0) return ReadOnlyList.Singleton(this);
+        return from r in ExploreReverse(levels - 1)
+               from v in MainHash.DataRange
+               from e in r.InverseAdvance(v)
+               select e;
+    }
+    public IEnumerable<Tuple<HashState, int[]>> ExploreReverseTraceVolatile(int levels) {
+        foreach (var e in ExploreDataVolatile(levels, levels)) {
+            foreach (var p in InverseAdvance(e)) {
+                yield return Tuple.Create(p, e);
+            }
+        }
+    }
     public IEnumerable<Tuple<HashState, int[]>> ExploreTraceVolatile(int levels) {
         foreach (var e in ExploreDataVolatile(levels, levels)) {
             yield return Tuple.Create(Advance(e), e);
@@ -90,8 +105,8 @@ public struct HashState {
     public IEnumerable<HashState> InverseRound(Int32 e) {
         var a = this.A;
         var b = this.B;
-        return from nb in MathEx.InvDivS32(b - a - 0x81BE + e, 3)
-               from na in MathEx.InvMulS32(a - 0x74FA + e - nb, -6)
+        return from nb in (b - a - 0x81BE + e).InvDivS32(3)
+               from na in (a - 0x74FA + e - nb).InvMulS32(-6)
                select new HashState(na, nb);
     }
 
@@ -103,6 +118,9 @@ public struct HashState {
                       select g
                       ).Distinct().ToArray();
         return result;
+    }
+    public IEnumerable<HashState> InverseAdvance(IEnumerable<Int32> e) {
+        return e.Aggregate(new[] {this}, (h, x) => h.SelectMany(v => v.InverseAdvance(x)).ToArray());
     }
     public override string ToString() {
         return "(A: " + this.A + ", B: " + this.B + ")";

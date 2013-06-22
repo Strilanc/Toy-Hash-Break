@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Strilanc.LinqToCollections;
 
 public static class MainHash {
     public const string CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
@@ -13,7 +12,6 @@ public static class MainHash {
 
     public static void Main() {
         unchecked {
-            var x = Hash4.Break(Hash(Encode("aaaaaaaaa")), 9);
             var passwordHash = new HashState((int)0xDF8BEDAAu, (int)0xB5A86DDEu);
             var nameHash1 = new HashState((int)0xAD414D7Du, (int)0x8CC36A67u);
             var nameHash2 = new HashState(0x605D4A4F, 0x7EDDB1E5); // Procyon
@@ -28,7 +26,7 @@ public static class MainHash {
 
 
             //var rPass = 9.Range().Select(e => Hash4.Break(passwordHash, e, Hash(Encode("<+")))).FirstOrDefault(e => e != null);
-            var rPass = Hash4.Break(passwordHash, 9, Hash(Encode("<+")));
+            var rPass = Hash4.Break(passwordHash, 9, cache: true, start: Hash(Encode("<+")));
             Console.WriteLine("pass: " + Decode(rPass));
 
             //var rName3 = 9.Range().Select(e => Hash4.Break(nameHash3, e)).FirstOrDefault(e => e != null);
@@ -55,7 +53,7 @@ public static class MainHash {
     }
     public static string Decode(IEnumerable<Int32> value) {
         if (value == null) return null;
-        return value.Select(Decode).Join("");
+        return String.Join("", value.Select(Decode));
     }
 
     public static bool HashMatches(string text, params HashState[] validHashes) {
