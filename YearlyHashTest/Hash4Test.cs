@@ -9,6 +9,13 @@ public class Hash4Test {
         Assert.AreEqual(suffix, breakSuffix);        
     }
     [TestMethod]
+    public void BreakTest0() {
+        var start = MainHash.Hash(MainHash.Encode("ax"));
+        var end = MainHash.Hash(MainHash.Encode("ay" + "zr"));
+        var breakSuffix = MainHash.Decode(Hash4.Break(end, "zr".Length, cache: false, start: start));
+        Assert.AreEqual(null, breakSuffix);
+    }
+    [TestMethod]
     public void BreakTest1() {
         AssertCanBreak("fjdh", "glfi");
     }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Strilanc.LinqToCollections;
 
 public static class MainHash {
     public const string CharSet = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789`~!@#$%^&*()_+-=|[];',.{}:<>? ";
@@ -17,26 +18,14 @@ public static class MainHash {
             var nameHash2 = new HashState(0x605D4A4F, 0x7EDDB1E5); // Procyon
             var nameHash3 = new HashState(0x3D10F092, 0x60084719);
 
-            //var rName2 = 9.Range().Select(e => Hash4.Break(nameHash2, e)).FirstOrDefault(e => e != null);
-            //Console.WriteLine("n2: " + Decode(rName2));
             Console.WriteLine("n2: Hash({0}): {1} == {2}", "Procyon", Hash(Encode("Procyon")), nameHash2);
+            Console.WriteLine("pass: Hash({0}): {1} == {2}", "<+nt1AkgbMht", Hash(Encode("<+nt1AkgbMht")), passwordHash);
 
-            //var rName1 = 9.Range().Select(e => Hash4.Break(nameHash1, e)).FirstOrDefault(e => e != null);
-            //Console.WriteLine("n1: " + Decode(rName1));
+            var rName1 = 11.Range().Select(e => Hash4.Break(nameHash1, e, cache: true)).FirstOrDefault(e => e != null);
+            Console.WriteLine("n1: " + Decode(rName1));
 
-
-            //var rPass = 9.Range().Select(e => Hash4.Break(passwordHash, e, Hash(Encode("<+")))).FirstOrDefault(e => e != null);
-            var rPass = Hash4.Break(passwordHash, 9, cache: true, start: Hash(Encode("<+")));
-            Console.WriteLine("pass: " + Decode(rPass));
-
-            //var rName3 = 9.Range().Select(e => Hash4.Break(nameHash3, e)).FirstOrDefault(e => e != null);
-            //Console.WriteLine("n3: " + Decode(rName3));
-
-            
-            //var testHash = Hash(Encode("iampied"));
-            //var test = 7.Range().Select(e => Hash4.Break(testHash, e)).FirstOrDefault(e => e != null);
-            //Console.WriteLine("test: " + Decode(test));
-            //Console.WriteLine("done");
+            var rName3 = 11.Range().Select(e => Hash4.Break(nameHash3, e, cache: true)).FirstOrDefault(e => e != null);
+            Console.WriteLine("n3: " + Decode(rName3));
 
             Console.ReadLine();
         }

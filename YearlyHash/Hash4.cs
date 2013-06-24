@@ -19,7 +19,8 @@ public static class Hash4 {
         if (i > 0) yield return r.Take(i).ToArray();
     }
     public static int[] Break(HashState end, int assumedLength, bool cache, HashState start = default(HashState)) {
-        return Break(end, assumedLength, new[] { start }, cache).Item2;
+        var r = Break(end, assumedLength, new[] { start }, cache);
+        return r == null ? null : r.Item2;
     }
     public static Tuple<HashState, int[]> Break(HashState end, int assumedLength, IEnumerable<HashState> starts, bool cache) {
         var numExpandBackward = Math.Max(0, Math.Min(Math.Min(4, assumedLength - 1), (assumedLength * 2) / 3));
@@ -31,16 +32,21 @@ public static class Hash4 {
                                        from e in start.ExploreTraceVolatile(assumedLength - numExpandBackward)
                                        where filter.MayContain(e.Item1)
                                        select new { start, data = e.Item2.ToArray(), end = e.Item1 };
+        if (numExpandBackward == 0) {
+            return possiblePartialSolutions
+                .Select(e => Tuple.Create(e.start, e.data))
+                .FirstOrDefault();
+        }
         
         var partitions = possiblePartialSolutions.PartitionVolatile(10000);
 
         var solutions = from partition in partitions
                         let partialSolutionMap = partition.ToDictionary(e => e.end, e => e)
-                        from midPoint in end.ExploreReverseTraceVolatile(numExpandBackward)
-                        where partialSolutionMap.ContainsKey(midPoint.Item1)
-                        let partialSolution = partialSolutionMap[midPoint.Item1]
+                        let secondHalf = Break(end, numExpandBackward, partialSolutionMap.Keys, true)
+                        where secondHalf != null
+                        let partialSolution = partialSolutionMap[secondHalf.Item1]
                         let start = partialSolution.start
-                        let data = partialSolution.data.Concat(midPoint.Item2.Reverse()).ToArray()
+                        let data = partialSolution.data.Concat(secondHalf.Item2).ToArray()
                         select Tuple.Create(start, data);
 
         return solutions.FirstOrDefault();
@@ -120,7 +126,7 @@ internal class HashStateBloomFilter {
         var k = m * Math.Log(2) / n;
         m = 1L << (int)Math.Ceiling(Math.Log(m, 2));
         if (m < 128) m = 128;
-        m = 1L << 33;
+        m = new[] { 1L << 20, 1L << 30, 1L << 30, 1L << 30, 1L << 33 }[power];
         this._bits = new Bits((ulong)m);
     }
     public static HashStateBloomFilter Gen(HashState start, int pow, double pFalsePositive) {
