@@ -18,14 +18,19 @@ public static class MainHash {
             var nameHash2 = new HashState(0x605D4A4F, 0x7EDDB1E5); // Procyon
             var nameHash3 = new HashState(0x3D10F092, 0x60084719);
 
+            Console.WriteLine("n1: Hash({0}): {1} == {2}", "hRlGz%W3&R", Hash(Encode("hRlGz%W3&R")), nameHash1);
             Console.WriteLine("n2: Hash({0}): {1} == {2}", "Procyon", Hash(Encode("Procyon")), nameHash2);
+            Console.WriteLine("n3: Hash({0}): {1} == {2}", "b>4FXV'Xf8", Hash(Encode("b>4FXV'Xf8")), nameHash3);
             Console.WriteLine("pass: Hash({0}): {1} == {2}", "<+nt1AkgbMht", Hash(Encode("<+nt1AkgbMht")), passwordHash);
 
-            var rName1 = 11.Range().Select(e => Hash4.Break(nameHash1, e, cache: true)).FirstOrDefault(e => e != null);
-            Console.WriteLine("n1: " + Decode(rName1));
-
-            var rName3 = 11.Range().Select(e => Hash4.Break(nameHash3, e, cache: true)).FirstOrDefault(e => e != null);
-            Console.WriteLine("n3: " + Decode(rName3));
+            var knownPrefix = "";
+            var start = Hash(Encode(knownPrefix));
+            var dest = nameHash1;
+            var solution = 
+                11.Range()
+                .Select(assumedLength => Hash4.Break(dest, assumedLength, false, start))
+                .FirstOrDefault(e => e != null);
+            Console.WriteLine("solution: " + Decode(solution));
 
             Console.ReadLine();
         }
