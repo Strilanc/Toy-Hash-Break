@@ -19,6 +19,15 @@ public struct HashState {
     public HashState Advance(IEnumerable<Int32> e) {
         return e.Aggregate(this, (h, x) => h.Advance(x));
     }
+    public HashState AdvanceRound(Int32 e) {
+        unchecked {
+            var a = this.A;
+            var b = this.B;
+            a = a * -6 + b + 0x74FA - e;
+            b = b / 3 + a + 0x81BE - e;
+            return new HashState(a, b);
+        }
+    }
     public HashState Advance(Int32 e) {
         unchecked {
             var a = this.A;
